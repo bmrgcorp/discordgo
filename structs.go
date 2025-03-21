@@ -1,5 +1,5 @@
 // Discordgo - Discord bindings for Go
-// Available at https://github.com/bwmarrin/discordgo
+// Available at https://github.com/bmrgcorp/discordgo
 
 // Copyright 2015-2016 Bruce Marriner <bruce@sqls.net>.  All rights reserved.
 // Use of this source code is governed by a BSD-style
@@ -770,47 +770,20 @@ type Guild struct {
 	// to retrieve the icon itself.
 	Icon string `json:"icon"`
 
-	// The voice region of the guild.
-	Region string `json:"region"`
-
-	// The ID of the AFK voice channel.
-	AfkChannelID string `json:"afk_channel_id"`
+	// The number of members in the guild.
+	// NOTE: this field is only present when requesting the guild with the "WithCounts" enabled.
+	MemberCount int `json:"member_count"`
 
 	// The user ID of the owner of the guild.
 	OwnerID string `json:"owner_id"`
-
-	// If we are the owner of the guild
-	Owner bool `json:"owner"`
 
 	// The time at which the current user joined the guild.
 	// This field is only present in GUILD_CREATE events and websocket
 	// update events, and thus is only present in state-cached guilds.
 	JoinedAt time.Time `json:"joined_at"`
 
-	// The hash of the guild's discovery splash.
-	DiscoverySplash string `json:"discovery_splash"`
-
-	// The hash of the guild's splash.
-	Splash string `json:"splash"`
-
-	// The timeout, in seconds, before a user is considered AFK in voice.
-	AfkTimeout int `json:"afk_timeout"`
-
-	// The number of members in the guild.
-	// This field is only present in GUILD_CREATE events and websocket
-	// update events, and thus is only present in state-cached guilds.
-	MemberCount int `json:"member_count"`
-
-	// The verification level required for the guild.
-	VerificationLevel VerificationLevel `json:"verification_level"`
-
-	// Whether the guild is considered large. This is
-	// determined by a member threshold in the identify packet,
-	// and is currently hard-coded at 250 members in the library.
-	Large bool `json:"large"`
-
-	// The default message notification setting for the guild.
-	DefaultMessageNotifications MessageNotifications `json:"default_message_notifications"`
+	// i wanna remove it but it'd be too complicated cuz the discordgo maintainers uses it for a lot of events
+	Members []*Member `json:"members"`
 
 	// A list of roles in the guild.
 	Roles []*Role `json:"roles"`
@@ -820,23 +793,6 @@ type Guild struct {
 
 	// A list of the custom stickers present in the guild.
 	Stickers []*Sticker `json:"stickers"`
-
-	// A list of the members in the guild.
-	// This field is only present in GUILD_CREATE events and websocket
-	// update events, and thus is only present in state-cached guilds.
-	Members []*Member `json:"members"`
-
-	// A list of partial presence objects for members in the guild.
-	// This field is only present in GUILD_CREATE events and websocket
-	// update events, and thus is only present in state-cached guilds.
-	Presences []*Presence `json:"presences"`
-
-	// The maximum number of presences for the guild (the default value, currently 25000, is in effect when null is returned)
-	MaxPresences int `json:"max_presences"`
-
-	// The maximum number of members for the guild
-	MaxMembers int `json:"max_members"`
-
 	// A list of channels in the guild.
 	// This field is only present in GUILD_CREATE events and websocket
 	// update events, and thus is only present in state-cached guilds.
@@ -847,81 +803,17 @@ type Guild struct {
 	// update events and thus is only present in state-cached guilds.
 	Threads []*Channel `json:"threads"`
 
-	// A list of voice states for the guild.
-	// This field is only present in GUILD_CREATE events and websocket
-	// update events, and thus is only present in state-cached guilds.
-	VoiceStates []*VoiceState `json:"voice_states"`
-
-	// Whether this guild is currently unavailable (most likely due to outage).
-	// This field is only present in GUILD_CREATE events and websocket
-	// update events, and thus is only present in state-cached guilds.
-	Unavailable bool `json:"unavailable"`
-
-	// The explicit content filter level
-	ExplicitContentFilter ExplicitContentFilterLevel `json:"explicit_content_filter"`
-
-	// The NSFW Level of the guild
-	NSFWLevel GuildNSFWLevel `json:"nsfw_level"`
-
-	// The list of enabled guild features
-	Features []GuildFeature `json:"features"`
-
-	// Required MFA level for the guild
-	MfaLevel MfaLevel `json:"mfa_level"`
-
-	// The application id of the guild if bot created.
-	ApplicationID string `json:"application_id"`
-
-	// Whether or not the Server Widget is enabled
-	WidgetEnabled bool `json:"widget_enabled"`
-
-	// The Channel ID for the Server Widget
-	WidgetChannelID string `json:"widget_channel_id"`
-
-	// The Channel ID to which system messages are sent (eg join and leave messages)
-	SystemChannelID string `json:"system_channel_id"`
-
-	// The System channel flags
-	SystemChannelFlags SystemChannelFlag `json:"system_channel_flags"`
-
-	// The ID of the rules channel ID, used for rules.
-	RulesChannelID string `json:"rules_channel_id"`
-
-	// the vanity url code for the guild
-	VanityURLCode string `json:"vanity_url_code"`
-
 	// the description for the guild
 	Description string `json:"description"`
 
 	// The hash of the guild's banner
 	Banner string `json:"banner"`
 
-	// The premium tier of the guild
-	PremiumTier PremiumTier `json:"premium_tier"`
-
-	// The total number of users currently boosting this server
-	PremiumSubscriptionCount int `json:"premium_subscription_count"`
-
-	// The preferred locale of a guild with the "PUBLIC" feature; used in server discovery and notices from Discord; defaults to "en-US"
-	PreferredLocale string `json:"preferred_locale"`
-
-	// The id of the channel where admins and moderators of guilds with the "PUBLIC" feature receive notices from Discord
-	PublicUpdatesChannelID string `json:"public_updates_channel_id"`
-
-	// The maximum amount of users in a video channel
-	MaxVideoChannelUsers int `json:"max_video_channel_users"`
-
 	// Approximate number of members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true
 	ApproximateMemberCount int `json:"approximate_member_count"`
 
 	// Approximate number of non-offline members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true
 	ApproximatePresenceCount int `json:"approximate_presence_count"`
-
-	// Permissions of our user
-	Permissions int64 `json:"permissions,string"`
-
-	// Stage instances in the guild
-	StageInstances []*StageInstance `json:"stage_instances"`
 }
 
 // A GuildPreview holds data related to a specific public Discord Guild, even if the user is not in the guild.
@@ -1298,12 +1190,10 @@ func (g *Guild) BannerURL(size string) string {
 
 // A UserGuild holds a brief version of a Guild
 type UserGuild struct {
-	ID          string         `json:"id"`
-	Name        string         `json:"name"`
-	Icon        string         `json:"icon"`
-	Owner       bool           `json:"owner"`
-	Permissions int64          `json:"permissions,string"`
-	Features    []GuildFeature `json:"features"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Icon        string `json:"icon"`
+	Permissions int64  `json:"permissions,string"`
 
 	// Approximate number of members in this guild.
 	// NOTE: this field is only filled when withCounts is true.
@@ -1557,12 +1447,6 @@ type Member struct {
 	// The nickname of the member, if they have one.
 	Nick string `json:"nick"`
 
-	// Whether the member is deafened at a guild level.
-	Deaf bool `json:"deaf"`
-
-	// Whether the member is muted at a guild level.
-	Mute bool `json:"mute"`
-
 	// The hash of the avatar for the guild member, if any.
 	Avatar string `json:"avatar"`
 
@@ -1575,22 +1459,9 @@ type Member struct {
 	// A list of IDs of the roles which are possessed by the member.
 	Roles []string `json:"roles"`
 
-	// When the user used their Nitro boost on the server
-	PremiumSince *time.Time `json:"premium_since"`
-
 	// The flags of this member. This is a combination of bit masks; the presence of a certain
 	// flag can be checked by performing a bitwise AND between this int and the flag.
 	Flags MemberFlags `json:"flags"`
-
-	// Is true while the member hasn't accepted the membership screen.
-	Pending bool `json:"pending"`
-
-	// Total permissions of the member in the channel, including overrides, returned when in the interaction object.
-	Permissions int64 `json:"permissions,string"`
-
-	// The time at which the member's timeout will expire.
-	// Time in the past or nil if the user is not timed out.
-	CommunicationDisabledUntil *time.Time `json:"communication_disabled_until"`
 }
 
 // Mention creates a member mention

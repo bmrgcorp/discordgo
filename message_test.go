@@ -28,15 +28,7 @@ func TestContentWithMoreMentionsReplaced(t *testing.T) {
 		GuildID: "guild",
 		ID:      "channel",
 	})
-	m := &Message{
-		Content:      "<@&role> <@!user> <@user> <#channel>",
-		ChannelID:    "channel",
-		MentionRoles: []string{"role"},
-		Mentions:     []*User{user},
-	}
-	if result, _ := m.ContentWithMoreMentionsReplaced(s); result != "@Role Name @User Nick @User Name #Channel Name" {
-		t.Error(result)
-	}
+
 }
 func TestGettingEmojisFromMessage(t *testing.T) {
 	msg := "test test <:kitty14:811736565172011058> <:kitty4:811736468812595260>"

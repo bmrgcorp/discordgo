@@ -1,5 +1,5 @@
 // Discordgo - Discord bindings for Go
-// Available at https://github.com/bwmarrin/discordgo
+// Available at https://github.com/bmrgcorp/discordgo
 
 // Copyright 2015-2016 Bruce Marriner <bruce@sqls.net>.  All rights reserved.
 // Use of this source code is governed by a BSD-style
@@ -1304,28 +1304,6 @@ func (s *Session) GuildIcon(guildID string, options ...RequestOption) (img image
 	}
 
 	body, err := s.RequestWithBucketID("GET", EndpointGuildIcon(guildID, g.Icon), nil, EndpointGuildIcon(guildID, ""), options...)
-	if err != nil {
-		return
-	}
-
-	img, _, err = image.Decode(bytes.NewReader(body))
-	return
-}
-
-// GuildSplash returns an image.Image of a guild splash image.
-// guildID   : The ID of a Guild.
-func (s *Session) GuildSplash(guildID string, options ...RequestOption) (img image.Image, err error) {
-	g, err := s.Guild(guildID, options...)
-	if err != nil {
-		return
-	}
-
-	if g.Splash == "" {
-		err = ErrGuildNoSplash
-		return
-	}
-
-	body, err := s.RequestWithBucketID("GET", EndpointGuildSplash(guildID, g.Splash), nil, EndpointGuildSplash(guildID, ""), options...)
 	if err != nil {
 		return
 	}

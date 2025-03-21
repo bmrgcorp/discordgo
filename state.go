@@ -1,5 +1,5 @@
 // Discordgo - Discord bindings for Go
-// Available at https://github.com/bwmarrin/discordgo
+// Available at https://github.com/bmrgcorp/discordgo
 
 // Copyright 2015-2016 Bruce Marriner <bruce@sqls.net>.  All rights reserved.
 // Use of this source code is governed by a BSD-style
@@ -125,17 +125,11 @@ func (s *State) GuildAdd(guild *Guild) error {
 		if guild.Members == nil {
 			guild.Members = g.Members
 		}
-		if guild.Presences == nil {
-			guild.Presences = g.Presences
-		}
 		if guild.Channels == nil {
 			guild.Channels = g.Channels
 		}
 		if guild.Threads == nil {
 			guild.Threads = g.Threads
-		}
-		if guild.VoiceStates == nil {
-			guild.VoiceStates = g.VoiceStates
 		}
 		*g = *guild
 		return nil
@@ -175,8 +169,9 @@ func (s *State) GuildRemove(guild *Guild) error {
 
 // Guild gets a guild by ID.
 // Useful for querying if @me is in a guild:
-//     _, err := discordgo.Session.State.Guild(guildID)
-//     isInGuild := err == nil
+//
+//	_, err := discordgo.Session.State.Guild(guildID)
+//	isInGuild := err == nil
 func (s *State) Guild(guildID string) (*Guild, error) {
 	if s == nil {
 		return nil, ErrNilState
@@ -187,116 +182,6 @@ func (s *State) Guild(guildID string) (*Guild, error) {
 
 	if g, ok := s.guildMap[guildID]; ok {
 		return g, nil
-	}
-
-	return nil, ErrStateNotFound
-}
-
-func (s *State) presenceAdd(guildID string, presence *Presence) error {
-	guild, ok := s.guildMap[guildID]
-	if !ok {
-		return ErrStateNotFound
-	}
-
-	for i, p := range guild.Presences {
-		if p.User.ID == presence.User.ID {
-			//guild.Presences[i] = presence
-
-			//Update status
-			guild.Presences[i].Activities = presence.Activities
-			if presence.Status != "" {
-				guild.Presences[i].Status = presence.Status
-			}
-			if presence.ClientStatus.Desktop != "" {
-				guild.Presences[i].ClientStatus.Desktop = presence.ClientStatus.Desktop
-			}
-			if presence.ClientStatus.Mobile != "" {
-				guild.Presences[i].ClientStatus.Mobile = presence.ClientStatus.Mobile
-			}
-			if presence.ClientStatus.Web != "" {
-				guild.Presences[i].ClientStatus.Web = presence.ClientStatus.Web
-			}
-
-			//Update the optionally sent user information
-			//ID Is a mandatory field so you should not need to check if it is empty
-			guild.Presences[i].User.ID = presence.User.ID
-
-			if presence.User.Avatar != "" {
-				guild.Presences[i].User.Avatar = presence.User.Avatar
-			}
-			if presence.User.Discriminator != "" {
-				guild.Presences[i].User.Discriminator = presence.User.Discriminator
-			}
-			if presence.User.Email != "" {
-				guild.Presences[i].User.Email = presence.User.Email
-			}
-			if presence.User.Token != "" {
-				guild.Presences[i].User.Token = presence.User.Token
-			}
-			if presence.User.Username != "" {
-				guild.Presences[i].User.Username = presence.User.Username
-			}
-
-			return nil
-		}
-	}
-
-	guild.Presences = append(guild.Presences, presence)
-	return nil
-}
-
-// PresenceAdd adds a presence to the current world state, or
-// updates it if it already exists.
-func (s *State) PresenceAdd(guildID string, presence *Presence) error {
-	if s == nil {
-		return ErrNilState
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	return s.presenceAdd(guildID, presence)
-}
-
-// PresenceRemove removes a presence from the current world state.
-func (s *State) PresenceRemove(guildID string, presence *Presence) error {
-	if s == nil {
-		return ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return err
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	for i, p := range guild.Presences {
-		if p.User.ID == presence.User.ID {
-			guild.Presences = append(guild.Presences[:i], guild.Presences[i+1:]...)
-			return nil
-		}
-	}
-
-	return ErrStateNotFound
-}
-
-// Presence gets a presence by ID from a guild.
-func (s *State) Presence(guildID, userID string) (*Presence, error) {
-	if s == nil {
-		return nil, ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, p := range guild.Presences {
-		if p.User.ID == userID {
-			return p, nil
-		}
 	}
 
 	return nil, ErrStateNotFound
@@ -621,44 +506,6 @@ outer:
 	return nil
 }
 
-// ThreadMembersUpdate updates thread members list
-func (s *State) ThreadMembersUpdate(tmu *ThreadMembersUpdate) error {
-	thread, err := s.Channel(tmu.ID)
-	if err != nil {
-		return err
-	}
-	s.Lock()
-	defer s.Unlock()
-
-	for idx, member := range thread.Members {
-		for _, removedMember := range tmu.RemovedMembers {
-			if member.ID == removedMember {
-				thread.Members = append(thread.Members[:idx], thread.Members[idx+1:]...)
-				break
-			}
-		}
-	}
-
-	for _, addedMember := range tmu.AddedMembers {
-		thread.Members = append(thread.Members, addedMember.ThreadMember)
-		if addedMember.Member != nil {
-			err = s.memberAdd(addedMember.Member)
-			if err != nil {
-				return err
-			}
-		}
-		if addedMember.Presence != nil {
-			err = s.presenceAdd(tmu.GuildID, addedMember.Presence)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	thread.MemberCount = tmu.MemberCount
-
-	return nil
-}
-
 // ThreadMemberUpdate sets or updates member data for the current user.
 func (s *State) ThreadMemberUpdate(mu *ThreadMemberUpdate) error {
 	thread, err := s.Channel(mu.ID)
@@ -766,12 +613,7 @@ func (s *State) MessageAdd(message *Message) error {
 			if message.Content != "" {
 				m.Content = message.Content
 			}
-			if message.EditedTimestamp != nil {
-				m.EditedTimestamp = message.EditedTimestamp
-			}
-			if message.Mentions != nil {
-				m.Mentions = message.Mentions
-			}
+
 			if message.Embeds != nil {
 				m.Embeds = message.Embeds
 			}
@@ -829,57 +671,6 @@ func (s *State) messageRemoveByID(channelID, messageID string) error {
 	}
 
 	return ErrStateNotFound
-}
-
-func (s *State) voiceStateUpdate(update *VoiceStateUpdate) error {
-	guild, err := s.Guild(update.GuildID)
-	if err != nil {
-		return err
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	// Handle Leaving Channel
-	if update.ChannelID == "" {
-		for i, state := range guild.VoiceStates {
-			if state.UserID == update.UserID {
-				guild.VoiceStates = append(guild.VoiceStates[:i], guild.VoiceStates[i+1:]...)
-				return nil
-			}
-		}
-	} else {
-		for i, state := range guild.VoiceStates {
-			if state.UserID == update.UserID {
-				guild.VoiceStates[i] = update.VoiceState
-				return nil
-			}
-		}
-
-		guild.VoiceStates = append(guild.VoiceStates, update.VoiceState)
-	}
-
-	return nil
-}
-
-// VoiceState gets a VoiceState by guild and user ID.
-func (s *State) VoiceState(guildID, userID string) (*VoiceState, error) {
-	if s == nil {
-		return nil, ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, state := range guild.VoiceStates {
-		if state.UserID == userID {
-			return state, nil
-		}
-	}
-
-	return nil, ErrStateNotFound
 }
 
 // Message gets a message by channel and message ID.
@@ -1022,11 +813,6 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 			}
 		}
 
-		if s.TrackPresences {
-			for _, p := range t.Presences {
-				err = s.PresenceAdd(t.GuildID, p)
-			}
-		}
 	case *GuildRoleCreate:
 		if s.TrackRoles {
 			err = s.RoleAdd(t.GuildID, t.Role)
@@ -1088,10 +874,6 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		if s.TrackThreads {
 			err = s.ThreadMemberUpdate(t)
 		}
-	case *ThreadMembersUpdate:
-		if s.TrackThreadMembers {
-			err = s.ThreadMembersUpdate(t)
-		}
 	case *ThreadListSync:
 		if s.TrackThreads {
 			err = s.ThreadListSync(t)
@@ -1128,44 +910,6 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 				s.messageRemoveByID(t.ChannelID, mID)
 			}
 		}
-	case *VoiceStateUpdate:
-		if s.TrackVoice {
-			var old *VoiceState
-			old, err = s.VoiceState(t.GuildID, t.UserID)
-			if err == nil {
-				oldCopy := *old
-				t.BeforeUpdate = &oldCopy
-			}
-
-			err = s.voiceStateUpdate(t)
-		}
-	case *PresenceUpdate:
-		if s.TrackPresences {
-			s.PresenceAdd(t.GuildID, &t.Presence)
-		}
-		if s.TrackMembers {
-			if t.Status == StatusOffline {
-				return
-			}
-
-			var m *Member
-			m, err = s.Member(t.GuildID, t.User.ID)
-
-			if err != nil {
-				// Member not found; this is a user coming online
-				m = &Member{
-					GuildID: t.GuildID,
-					User:    t.User,
-				}
-			} else {
-				if t.User.Username != "" {
-					m.User.Username = t.User.Username
-				}
-			}
-
-			err = s.MemberAdd(m)
-		}
-
 	}
 
 	return

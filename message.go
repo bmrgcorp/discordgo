@@ -1,5 +1,5 @@
 // Discordgo - Discord bindings for Go
-// Available at https://github.com/bwmarrin/discordgo
+// Available at https://github.com/bmrgcorp/discordgo
 
 // Copyright 2015-2016 Bruce Marriner <bruce@sqls.net>.  All rights reserved.
 // Use of this source code is governed by a BSD-style
@@ -65,18 +65,8 @@ type Message struct {
 	// the creation time via the ID.
 	Timestamp time.Time `json:"timestamp"`
 
-	// The time at which the last edit of the message
-	// occurred, if it has been edited.
-	EditedTimestamp *time.Time `json:"edited_timestamp"`
-
 	// The roles mentioned in the message.
 	MentionRoles []string `json:"mention_roles"`
-
-	// Whether the message is text-to-speech.
-	TTS bool `json:"tts"`
-
-	// Whether the message mentions everyone.
-	MentionEveryone bool `json:"mention_everyone"`
 
 	// The author of the message. This is not guaranteed to be a
 	// valid user (webhook-sent messages do not possess a full author).
@@ -91,15 +81,6 @@ type Message struct {
 	// A list of embeds present in the message.
 	Embeds []*MessageEmbed `json:"embeds"`
 
-	// A list of users mentioned in the message.
-	Mentions []*User `json:"mentions"`
-
-	// A list of reactions to the message.
-	Reactions []*MessageReactions `json:"reactions"`
-
-	// Whether the message is pinned or not.
-	Pinned bool `json:"pinned"`
-
 	// The type of the message.
 	Type MessageType `json:"type"`
 
@@ -109,19 +90,6 @@ type Message struct {
 	// Member properties for this message's author,
 	// contains only partial information
 	Member *Member `json:"member"`
-
-	// Channels specifically mentioned in this message
-	// Not all channel mentions in a message will appear in mention_channels.
-	// Only textual channels that are visible to everyone in a lurkable guild will ever be included.
-	// Only crossposted messages (via Channel Following) currently include mention_channels at all.
-	// If no mentions in the message meet these requirements, this field will not be sent.
-	MentionChannels []*Channel `json:"mention_channels"`
-
-	// Is sent with Rich Presence-related chat embeds
-	Activity *MessageActivity `json:"activity"`
-
-	// Is sent with Rich Presence-related chat embeds
-	Application *MessageApplication `json:"application"`
 
 	// MessageReference contains reference data sent with crossposted or reply messages.
 	// This does not contain the reference *to* this message; this is for when *this* message references another.
@@ -135,11 +103,6 @@ type Message struct {
 	// If the field exists but is null, the referenced message was deleted.
 	ReferencedMessage *Message `json:"referenced_message"`
 
-	// The message associated with the message_reference.
-	// This is a minimal subset of fields in a message (e.g. Author is excluded)
-	// NOTE: This field is only returned when referenced when MessageReference.Type is MessageReferenceTypeForward.
-	MessageSnapshots []MessageSnapshot `json:"message_snapshots"`
-
 	// Deprecated, use InteractionMetadata.
 	// Is sent when the message is a response to an Interaction, without an existing message.
 	// This means responses to message component interactions do not include this property,
@@ -147,20 +110,6 @@ type Message struct {
 	Interaction *MessageInteraction `json:"interaction"`
 
 	InteractionMetadata *MessageInteractionMetadata `json:"interaction_metadata"`
-
-	// The flags of the message, which describe extra features of a message.
-	// This is a combination of bit masks; the presence of a certain permission can
-	// be checked by performing a bitwise AND between this int and the flag.
-	Flags MessageFlags `json:"flags"`
-
-	// The thread that was started from this message, includes thread member object
-	Thread *Channel `json:"thread,omitempty"`
-
-	// An array of StickerItem objects, representing sent stickers, if there were any.
-	StickerItems []*StickerItem `json:"sticker_items"`
-
-	// A poll object.
-	Poll *Poll `json:"poll"`
 }
 
 // UnmarshalJSON is a helper function to unmarshal the Message.
@@ -527,70 +476,7 @@ func (m *Message) Forward() *MessageReference {
 	return m.reference(MessageReferenceTypeForward, true)
 }
 
-// ContentWithMentionsReplaced will replace all @<id> mentions with the
-// username of the mention.
-func (m *Message) ContentWithMentionsReplaced() (content string) {
-	content = m.Content
-
-	for _, user := range m.Mentions {
-		content = strings.NewReplacer(
-			"<@"+user.ID+">", "@"+user.Username,
-			"<@!"+user.ID+">", "@"+user.Username,
-		).Replace(content)
-	}
-	return
-}
-
 var patternChannels = regexp.MustCompile("<#[^>]*>")
-
-// ContentWithMoreMentionsReplaced will replace all @<id> mentions with the
-// username of the mention, but also role IDs and more.
-func (m *Message) ContentWithMoreMentionsReplaced(s *Session) (content string, err error) {
-	content = m.Content
-
-	if !s.StateEnabled {
-		content = m.ContentWithMentionsReplaced()
-		return
-	}
-
-	channel, err := s.State.Channel(m.ChannelID)
-	if err != nil {
-		content = m.ContentWithMentionsReplaced()
-		return
-	}
-
-	for _, user := range m.Mentions {
-		nick := user.Username
-
-		member, err := s.State.Member(channel.GuildID, user.ID)
-		if err == nil && member.Nick != "" {
-			nick = member.Nick
-		}
-
-		content = strings.NewReplacer(
-			"<@"+user.ID+">", "@"+user.Username,
-			"<@!"+user.ID+">", "@"+nick,
-		).Replace(content)
-	}
-	for _, roleID := range m.MentionRoles {
-		role, err := s.State.Role(channel.GuildID, roleID)
-		if err != nil || !role.Mentionable {
-			continue
-		}
-
-		content = strings.Replace(content, "<@&"+role.ID+">", "@"+role.Name, -1)
-	}
-
-	content = patternChannels.ReplaceAllStringFunc(content, func(mention string) string {
-		channel, err := s.State.Channel(mention[2 : len(mention)-1])
-		if err != nil || channel.Type == ChannelTypeGuildVoice {
-			return mention
-		}
-
-		return "#" + channel.Name
-	})
-	return
-}
 
 // MessageInteraction contains information about the application command interaction which generated the message.
 type MessageInteraction struct {

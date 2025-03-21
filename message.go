@@ -68,6 +68,9 @@ type Message struct {
 	// The roles mentioned in the message.
 	MentionRoles []string `json:"mention_roles"`
 
+	// A list of users mentioned in the message.
+	Mentions []*User `json:"mentions"`
+
 	// The author of the message. This is not guaranteed to be a
 	// valid user (webhook-sent messages do not possess a full author).
 	Author *User `json:"author"`

@@ -1748,13 +1748,6 @@ func (s *Session) ChannelMessageSendComplex(channelID string, data *MessageSend,
 		}
 	}
 
-	if data.StickerIDs != nil {
-		if len(data.StickerIDs) > 3 {
-			err = fmt.Errorf("cannot send more than 3 stickers")
-			return
-		}
-	}
-
 	var response []byte
 	if len(files) > 0 {
 		contentType, body, encodeErr := MultipartBodyWithJSON(data, files)
@@ -1779,7 +1772,6 @@ func (s *Session) ChannelMessageSendComplex(channelID string, data *MessageSend,
 func (s *Session) ChannelMessageSendTTS(channelID string, content string, options ...RequestOption) (*Message, error) {
 	return s.ChannelMessageSendComplex(channelID, &MessageSend{
 		Content: content,
-		TTS:     true,
 	}, options...)
 }
 

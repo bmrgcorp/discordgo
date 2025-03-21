@@ -195,14 +195,11 @@ type File struct {
 type MessageSend struct {
 	Content         string                  `json:"content,omitempty"`
 	Embeds          []*MessageEmbed         `json:"embeds"`
-	TTS             bool                    `json:"tts"`
 	Components      []MessageComponent      `json:"components"`
 	Files           []*File                 `json:"-"`
 	AllowedMentions *MessageAllowedMentions `json:"allowed_mentions,omitempty"`
 	Reference       *MessageReference       `json:"message_reference,omitempty"`
-	StickerIDs      []string                `json:"sticker_ids"`
 	Flags           MessageFlags            `json:"flags,omitempty"`
-	Poll            *Poll                   `json:"poll,omitempty"`
 
 	// TODO: Remove this when compatibility is not required.
 	File *File `json:"-"`

@@ -770,6 +770,9 @@ type Guild struct {
 	// to retrieve the icon itself.
 	Icon string `json:"icon"`
 
+	// we need to add back for tickets
+	PremiumSubscriptionCount int `json:"premium_subscription_count"`
+
 	// The number of members in the guild.
 	// NOTE: this field is only present when requesting the guild with the "WithCounts" enabled.
 	MemberCount int `json:"member_count"`

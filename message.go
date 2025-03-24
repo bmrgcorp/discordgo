@@ -65,9 +65,6 @@ type Message struct {
 	// the creation time via the ID.
 	Timestamp time.Time `json:"timestamp"`
 
-	// The roles mentioned in the message.
-	MentionRoles []string `json:"mention_roles"`
-
 	// A list of users mentioned in the message.
 	Mentions []*User `json:"mentions"`
 
@@ -98,19 +95,6 @@ type Message struct {
 	// This does not contain the reference *to* this message; this is for when *this* message references another.
 	// To generate a reference to this message, use (*Message).Reference().
 	MessageReference *MessageReference `json:"message_reference"`
-
-	// The message associated with the message_reference
-	// NOTE: This field is only returned for messages with a type of 19 (REPLY) or 21 (THREAD_STARTER_MESSAGE).
-	// If the message is a reply but the referenced_message field is not present,
-	// the backend did not attempt to fetch the message that was being replied to, so its state is unknown.
-	// If the field exists but is null, the referenced message was deleted.
-	ReferencedMessage *Message `json:"referenced_message"`
-
-	// Deprecated, use InteractionMetadata.
-	// Is sent when the message is a response to an Interaction, without an existing message.
-	// This means responses to message component interactions do not include this property,
-	// instead including a MessageReference, as components exist on preexisting messages.
-	Interaction *MessageInteraction `json:"interaction"`
 
 	InteractionMetadata *MessageInteractionMetadata `json:"interaction_metadata"`
 }
@@ -298,15 +282,7 @@ type MessageAllowedMentions struct {
 
 // A MessageAttachment stores data for message attachments.
 type MessageAttachment struct {
-	ID          string `json:"id"`
-	URL         string `json:"url"`
-	ProxyURL    string `json:"proxy_url"`
-	Filename    string `json:"filename"`
-	ContentType string `json:"content_type"`
-	Width       int    `json:"width"`
-	Height      int    `json:"height"`
-	Size        int    `json:"size"`
-	Ephemeral   bool   `json:"ephemeral"`
+	URL string `json:"url"`
 }
 
 // MessageEmbedFooter is a part of a MessageEmbed struct.

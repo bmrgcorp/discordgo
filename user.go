@@ -59,8 +59,6 @@ type User struct {
 	// For bots, this is the application name.
 	GlobalName string `json:"global_name"`
 
-	// The hash of the user's banner image.
-	Banner string `json:"banner"`
 	// Whether the user is a bot.
 	Bot bool `json:"bot"`
 
@@ -68,10 +66,6 @@ type User struct {
 	// This is a combination of bit masks; the presence of a certain flag can
 	// be checked by performing a bitwise AND between this int and the flag.
 	PublicFlags UserFlags `json:"public_flags"`
-
-	// The flags on a user's account.
-	// Only available when the request is authorized via a Bearer token.
-	Flags int `json:"flags"`
 }
 
 // String returns a unique identifier of the form username#discriminator
@@ -104,14 +98,6 @@ func (u *User) AvatarURL(size string) string {
 		EndpointUserAvatarAnimated(u.ID, u.Avatar),
 		size,
 	)
-}
-
-// BannerURL returns the URL of the users's banner image.
-//
-//	size:    The size of the desired banner image as a power of two
-//	         Image size can be any power of two between 16 and 4096.
-func (u *User) BannerURL(size string) string {
-	return bannerURL(u.Banner, EndpointUserBanner(u.ID, u.Banner), EndpointUserBannerAnimated(u.ID, u.Banner), size)
 }
 
 // DefaultAvatarIndex returns the index of the user's default avatar.

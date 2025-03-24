@@ -144,9 +144,8 @@ func (m *Message) GetCustomEmojis() []*Emoji {
 	for _, em := range emojis {
 		parts := strings.Split(em, ":")
 		toReturn = append(toReturn, &Emoji{
-			ID:       parts[2][:len(parts[2])-1],
-			Name:     parts[1],
-			Animated: strings.HasPrefix(em, "<a:"),
+			ID:   parts[2][:len(parts[2])-1],
+			Name: parts[1],
 		})
 	}
 	return toReturn

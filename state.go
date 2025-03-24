@@ -378,9 +378,6 @@ func (s *State) ChannelAdd(channel *Channel) error {
 		if channel.PermissionOverwrites == nil {
 			channel.PermissionOverwrites = c.PermissionOverwrites
 		}
-		if channel.ThreadMetadata == nil {
-			channel.ThreadMetadata = c.ThreadMetadata
-		}
 
 		*c = *channel
 		return nil
@@ -478,7 +475,7 @@ func (s *State) ThreadListSync(tls *ThreadListSync) error {
 	index := 0
 outer:
 	for _, t := range guild.Threads {
-		if !t.ThreadMetadata.Archived && tls.ChannelIDs != nil {
+		if tls.ChannelIDs != nil { // noah—we removed a field from here since i removed it from the struct
 			for _, v := range tls.ChannelIDs {
 				if t.ParentID == v {
 					delete(s.channelMap, t.ID)

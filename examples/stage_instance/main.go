@@ -34,10 +34,8 @@ func main() {
 
 	// Create a new Stage instance on the previous channel
 	si, err := s.StageInstanceCreate(&discordgo.StageInstanceParams{
-		ChannelID:             *StageChannelID,
-		Topic:                 "Amazing topic",
-		PrivacyLevel:          discordgo.StageInstancePrivacyLevelGuildOnly,
-		SendStartNotification: true,
+		ChannelID: *StageChannelID,
+		Topic:     "Amazing topic",
 	})
 	if err != nil {
 		log.Fatalf("Cannot create stage instance: %v", err)

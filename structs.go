@@ -367,39 +367,11 @@ type Channel struct {
 	// The name of the channel.
 	Name string `json:"name"`
 
-	// The topic of the channel.
-	Topic string `json:"topic"`
-
 	// The type of the channel.
 	Type ChannelType `json:"type"`
 
-	// The ID of the last message sent in the channel. This is not
-	// guaranteed to be an ID of a valid message.
-	LastMessageID string `json:"last_message_id"`
-
-	// The timestamp of the last pinned message in the channel.
-	// nil if the channel has no pinned messages.
-	LastPinTimestamp *time.Time `json:"last_pin_timestamp"`
-
-	// An approximate count of messages in a thread, stops counting at 50
-	MessageCount int `json:"message_count"`
-	// An approximate count of users in a thread, stops counting at 50
-	MemberCount int `json:"member_count"`
-
-	// Whether the channel is marked as NSFW.
-	NSFW bool `json:"nsfw"`
-
-	// Icon of the group DM channel.
-	Icon string `json:"icon"`
-
 	// The position of the channel, used for sorting in client.
 	Position int `json:"position"`
-
-	// The bitrate of the channel, if it is a voice channel.
-	Bitrate int `json:"bitrate"`
-
-	// The recipients of the channel. This is only populated in DM channels.
-	Recipients []*User `json:"recipients"`
 
 	// The messages in the channel. This is only present in state-cached channels,
 	// and State.MaxMessageCount must be non-zero.
@@ -407,9 +379,6 @@ type Channel struct {
 
 	// A list of permission overwrites present for the channel.
 	PermissionOverwrites []*PermissionOverwrite `json:"permission_overwrites"`
-
-	// The user limit of the voice channel.
-	UserLimit int `json:"user_limit"`
 
 	// The ID of the parent channel, if the channel is under a category. For threads - id of the channel thread was created in.
 	ParentID string `json:"parent_id"`
@@ -424,8 +393,6 @@ type Channel struct {
 	// ApplicationID of the DM creator Zeroed if guild channel or not a bot user
 	ApplicationID string `json:"application_id"`
 
-	// Thread-specific fields not needed by other channels
-	ThreadMetadata *ThreadMetadata `json:"thread_metadata,omitempty"`
 	// Thread member object for the current user, if they have joined the thread, only included on certain API endpoints
 	Member *ThreadMember `json:"thread_member"`
 
@@ -440,21 +407,6 @@ type Channel struct {
 
 	// The IDs of the set of tags that have been applied to a thread in a forum channel.
 	AppliedTags []string `json:"applied_tags"`
-
-	// Emoji to use as the default reaction to a forum post.
-	DefaultReactionEmoji ForumDefaultReaction `json:"default_reaction_emoji"`
-
-	// The initial RateLimitPerUser to set on newly created threads in a channel.
-	// This field is copied to the thread at creation time and does not live update.
-	DefaultThreadRateLimitPerUser int `json:"default_thread_rate_limit_per_user"`
-
-	// The default sort order type used to order posts in forum channels.
-	// Defaults to null, which indicates a preferred sort order hasn't been set by a channel admin.
-	DefaultSortOrder *ForumSortOrderType `json:"default_sort_order"`
-
-	// The default forum layout view used to display posts in forum channels.
-	// Defaults to ForumLayoutNotSet, which indicates a layout view has not been set by a channel admin.
-	DefaultForumLayout ForumLayout `json:"default_forum_layout"`
 }
 
 // Mention returns a string which mentions the channel
@@ -469,31 +421,17 @@ func (c *Channel) IsThread() bool {
 
 // A ChannelEdit holds Channel Field data for a channel edit.
 type ChannelEdit struct {
-	Name                          string                 `json:"name,omitempty"`
-	Topic                         string                 `json:"topic,omitempty"`
-	NSFW                          *bool                  `json:"nsfw,omitempty"`
-	Position                      *int                   `json:"position,omitempty"`
-	Bitrate                       int                    `json:"bitrate,omitempty"`
-	UserLimit                     int                    `json:"user_limit,omitempty"`
-	PermissionOverwrites          []*PermissionOverwrite `json:"permission_overwrites,omitempty"`
-	ParentID                      string                 `json:"parent_id,omitempty"`
-	RateLimitPerUser              *int                   `json:"rate_limit_per_user,omitempty"`
-	Flags                         *ChannelFlags          `json:"flags,omitempty"`
-	DefaultThreadRateLimitPerUser *int                   `json:"default_thread_rate_limit_per_user,omitempty"`
-
-	// NOTE: threads only
-
-	Archived            *bool `json:"archived,omitempty"`
-	AutoArchiveDuration int   `json:"auto_archive_duration,omitempty"`
-	Locked              *bool `json:"locked,omitempty"`
-	Invitable           *bool `json:"invitable,omitempty"`
+	Name                 string                 `json:"name,omitempty"`
+	Topic                string                 `json:"topic,omitempty"`
+	Position             *int                   `json:"position,omitempty"`
+	UserLimit            int                    `json:"user_limit,omitempty"`
+	PermissionOverwrites []*PermissionOverwrite `json:"permission_overwrites,omitempty"`
+	ParentID             string                 `json:"parent_id,omitempty"`
+	Flags                *ChannelFlags          `json:"flags,omitempty"`
 
 	// NOTE: forum channels only
 
-	AvailableTags        *[]ForumTag           `json:"available_tags,omitempty"`
-	DefaultReactionEmoji *ForumDefaultReaction `json:"default_reaction_emoji,omitempty"`
-	DefaultSortOrder     *ForumSortOrderType   `json:"default_sort_order,omitempty"` // TODO: null
-	DefaultForumLayout   *ForumLayout          `json:"default_forum_layout,omitempty"`
+	AvailableTags *[]ForumTag `json:"available_tags,omitempty"`
 
 	// NOTE: forum threads only
 	AppliedTags *[]string `json:"applied_tags,omitempty"`
@@ -533,20 +471,6 @@ type ThreadStart struct {
 
 	// NOTE: forum threads only
 	AppliedTags []string `json:"applied_tags,omitempty"`
-}
-
-// ThreadMetadata contains a number of thread-specific channel fields that are not needed by other channel types.
-type ThreadMetadata struct {
-	// Whether the thread is archived
-	Archived bool `json:"archived"`
-	// Duration in minutes to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
-	AutoArchiveDuration int `json:"auto_archive_duration"`
-	// Timestamp when the thread's archive status was last changed, used for calculating recent activity
-	ArchiveTimestamp time.Time `json:"archive_timestamp"`
-	// Whether the thread is locked; when a thread is locked, only users with MANAGE_THREADS can unarchive it
-	Locked bool `json:"locked"`
-	// Whether non-moderators can add other non-moderators to a thread; only available on private threads
-	Invitable bool `json:"invitable"`
 }
 
 // ThreadMember is used to indicate whether a user has joined a thread or not.
@@ -600,14 +524,10 @@ type ForumTag struct {
 
 // Emoji struct holds data related to Emoji's
 type Emoji struct {
-	ID            string   `json:"id"`
-	Name          string   `json:"name"`
-	Roles         []string `json:"roles"`
-	User          *User    `json:"user"`
-	RequireColons bool     `json:"require_colons"`
-	Managed       bool     `json:"managed"`
-	Animated      bool     `json:"animated"`
-	Available     bool     `json:"available"`
+	ID      string   `json:"id"`
+	Name    string   `json:"name"`
+	Roles   []string `json:"roles"`
+	Managed bool     `json:"managed"`
 }
 
 // EmojiRegex is the regex used to find and identify emojis in messages
@@ -618,10 +538,6 @@ var (
 // MessageFormat returns a correctly formatted Emoji for use in Message content and embeds
 func (e *Emoji) MessageFormat() string {
 	if e.ID != "" && e.Name != "" {
-		if e.Animated {
-			return "<a:" + e.APIName() + ">"
-		}
-
 		return "<:" + e.APIName() + ">"
 	}
 
@@ -670,39 +586,6 @@ const (
 	StickerTypeStandard StickerType = 1
 	StickerTypeGuild    StickerType = 2
 )
-
-// Sticker represents a sticker object that can be sent in a Message.
-type Sticker struct {
-	ID          string        `json:"id"`
-	PackID      string        `json:"pack_id"`
-	Name        string        `json:"name"`
-	Description string        `json:"description"`
-	Tags        string        `json:"tags"`
-	Type        StickerType   `json:"type"`
-	FormatType  StickerFormat `json:"format_type"`
-	Available   bool          `json:"available"`
-	GuildID     string        `json:"guild_id"`
-	User        *User         `json:"user"`
-	SortValue   int           `json:"sort_value"`
-}
-
-// StickerItem represents the smallest amount of data required to render a sticker. A partial sticker object.
-type StickerItem struct {
-	ID         string        `json:"id"`
-	Name       string        `json:"name"`
-	FormatType StickerFormat `json:"format_type"`
-}
-
-// StickerPack represents a pack of standard stickers.
-type StickerPack struct {
-	ID             string     `json:"id"`
-	Stickers       []*Sticker `json:"stickers"`
-	Name           string     `json:"name"`
-	SKUID          string     `json:"sku_id"`
-	CoverStickerID string     `json:"cover_sticker_id"`
-	Description    string     `json:"description"`
-	BannerAssetID  string     `json:"banner_asset_id"`
-}
 
 // VerificationLevel type definition
 type VerificationLevel int
@@ -794,8 +677,6 @@ type Guild struct {
 	// A list of the custom emojis present in the guild.
 	Emojis []*Emoji `json:"emojis"`
 
-	// A list of the custom stickers present in the guild.
-	Stickers []*Sticker `json:"stickers"`
 	// A list of channels in the guild.
 	// This field is only present in GUILD_CREATE events and websocket
 	// update events, and thus is only present in state-cached guilds.
@@ -831,12 +712,6 @@ type GuildPreview struct {
 	// to retrieve the icon itself.
 	Icon string `json:"icon"`
 
-	// The hash of the guild's splash.
-	Splash string `json:"splash"`
-
-	// The hash of the guild's discovery splash.
-	DiscoverySplash string `json:"discovery_splash"`
-
 	// A list of the custom emojis present in the guild.
 	Emojis []*Emoji `json:"emojis"`
 
@@ -861,100 +736,6 @@ type GuildPreview struct {
 //	         Image size can be any power of two between 16 and 4096.
 func (g *GuildPreview) IconURL(size string) string {
 	return iconURL(g.Icon, EndpointGuildIcon(g.ID, g.Icon), EndpointGuildIconAnimated(g.ID, g.Icon), size)
-}
-
-// GuildScheduledEvent is a representation of a scheduled event in a guild. Only for retrieval of the data.
-// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event
-type GuildScheduledEvent struct {
-	// The ID of the scheduled event
-	ID string `json:"id"`
-	// The guild id which the scheduled event belongs to
-	GuildID string `json:"guild_id"`
-	// The channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL
-	ChannelID string `json:"channel_id"`
-	// The id of the user that created the scheduled event
-	CreatorID string `json:"creator_id"`
-	// The name of the scheduled event (1-100 characters)
-	Name string `json:"name"`
-	// The description of the scheduled event (1-1000 characters)
-	Description string `json:"description"`
-	// The time the scheduled event will start
-	ScheduledStartTime time.Time `json:"scheduled_start_time"`
-	// The time the scheduled event will end, required only when entity_type is EXTERNAL
-	ScheduledEndTime *time.Time `json:"scheduled_end_time"`
-	// The privacy level of the scheduled event
-	PrivacyLevel GuildScheduledEventPrivacyLevel `json:"privacy_level"`
-	// The status of the scheduled event
-	Status GuildScheduledEventStatus `json:"status"`
-	// Type of the entity where event would be hosted
-	// See field requirements
-	// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-field-requirements-by-entity-type
-	EntityType GuildScheduledEventEntityType `json:"entity_type"`
-	// The id of an entity associated with a guild scheduled event
-	EntityID string `json:"entity_id"`
-	// Additional metadata for the guild scheduled event
-	EntityMetadata GuildScheduledEventEntityMetadata `json:"entity_metadata"`
-	// The user that created the scheduled event
-	Creator *User `json:"creator"`
-	// The number of users subscribed to the scheduled event
-	UserCount int `json:"user_count"`
-	// The cover image hash of the scheduled event
-	// see https://discord.com/developers/docs/reference#image-formatting for more
-	// information about image formatting
-	Image string `json:"image"`
-}
-
-// GuildScheduledEventParams are the parameters allowed for creating or updating a scheduled event
-// https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event
-type GuildScheduledEventParams struct {
-	// The channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL
-	ChannelID string `json:"channel_id,omitempty"`
-	// The name of the scheduled event (1-100 characters)
-	Name string `json:"name,omitempty"`
-	// The description of the scheduled event (1-1000 characters)
-	Description string `json:"description,omitempty"`
-	// The time the scheduled event will start
-	ScheduledStartTime *time.Time `json:"scheduled_start_time,omitempty"`
-	// The time the scheduled event will end, required only when entity_type is EXTERNAL
-	ScheduledEndTime *time.Time `json:"scheduled_end_time,omitempty"`
-	// The privacy level of the scheduled event
-	PrivacyLevel GuildScheduledEventPrivacyLevel `json:"privacy_level,omitempty"`
-	// The status of the scheduled event
-	Status GuildScheduledEventStatus `json:"status,omitempty"`
-	// Type of the entity where event would be hosted
-	// See field requirements
-	// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-field-requirements-by-entity-type
-	EntityType GuildScheduledEventEntityType `json:"entity_type,omitempty"`
-	// Additional metadata for the guild scheduled event
-	EntityMetadata *GuildScheduledEventEntityMetadata `json:"entity_metadata,omitempty"`
-	// The cover image hash of the scheduled event
-	// see https://discord.com/developers/docs/reference#image-formatting for more
-	// information about image formatting
-	Image string `json:"image,omitempty"`
-}
-
-// MarshalJSON is a helper function to marshal GuildScheduledEventParams
-func (p GuildScheduledEventParams) MarshalJSON() ([]byte, error) {
-	type guildScheduledEventParams GuildScheduledEventParams
-
-	if p.EntityType == GuildScheduledEventEntityTypeExternal && p.ChannelID == "" {
-		return Marshal(struct {
-			guildScheduledEventParams
-			ChannelID json.RawMessage `json:"channel_id"`
-		}{
-			guildScheduledEventParams: guildScheduledEventParams(p),
-			ChannelID:                 json.RawMessage("null"),
-		})
-	}
-
-	return Marshal(guildScheduledEventParams(p))
-}
-
-// GuildScheduledEventEntityMetadata holds additional metadata for guild scheduled event.
-type GuildScheduledEventEntityMetadata struct {
-	// location of the event (1-100 characters)
-	// required for events with 'entity_type': EXTERNAL
-	Location string `json:"location"`
 }
 
 // GuildScheduledEventPrivacyLevel is the privacy level of a scheduled event.
@@ -1193,18 +974,9 @@ func (g *Guild) BannerURL(size string) string {
 
 // A UserGuild holds a brief version of a Guild
 type UserGuild struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Icon        string `json:"icon"`
-	Permissions int64  `json:"permissions,string"`
-
-	// Approximate number of members in this guild.
-	// NOTE: this field is only filled when withCounts is true.
-	ApproximateMemberCount int `json:"approximate_member_count"`
-
-	// Approximate number of non-offline members in this guild.
-	// NOTE: this field is only filled when withCounts is true.
-	ApproximatePresenceCount int `json:"approximate_presence_count"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Icon string `json:"icon"`
 }
 
 // GuildFeature indicates the presence of a feature in a guild
@@ -1267,15 +1039,8 @@ type Role struct {
 	// The name of the role.
 	Name string `json:"name"`
 
-	// Whether this role is managed by an integration, and
-	// thus cannot be manually added to, or taken from, members.
-	Managed bool `json:"managed"`
-
 	// Whether this role is mentionable.
 	Mentionable bool `json:"mentionable"`
-
-	// Whether this role is hoisted (shows up separately in member list).
-	Hoist bool `json:"hoist"`
 
 	// The hex color of this role.
 	Color int `json:"color"`
@@ -1287,17 +1052,6 @@ type Role struct {
 	// This is a combination of bit masks; the presence of a certain permission can
 	// be checked by performing a bitwise AND between this int and the permission.
 	Permissions int64 `json:"permissions,string"`
-
-	// The hash of the role icon. Use Role.IconURL to retrieve the icon's URL.
-	Icon string `json:"icon"`
-
-	// The emoji assigned to this role.
-	UnicodeEmoji string `json:"unicode_emoji"`
-
-	// The flags of the role, which describe its extra features.
-	// This is a combination of bit masks; the presence of a certain flag can
-	// be checked by performing a bitwise AND between this int and the flag.
-	Flags RoleFlags `json:"flags"`
 }
 
 // RoleFlags represent the flags of a Role.
@@ -1313,23 +1067,6 @@ const (
 // Mention returns a string which mentions the role
 func (r *Role) Mention() string {
 	return fmt.Sprintf("<@&%s>", r.ID)
-}
-
-// IconURL returns the URL of the role's icon.
-//
-//	size:    The size of the desired role icon as a power of two
-//	         Image size can be any power of two between 16 and 4096.
-func (r *Role) IconURL(size string) string {
-	if r.Icon == "" {
-		return ""
-	}
-
-	URL := EndpointRoleIcon(r.ID, r.Icon)
-
-	if size != "" {
-		return URL + "?size=" + size
-	}
-	return URL
 }
 
 // RoleParams represents the parameters needed to create or update a Role
@@ -1385,6 +1122,7 @@ type VoiceState struct {
 }
 
 // A Presence stores the online, offline, or idle and game status of Guild members.
+// bmrg doesnt use presence intent so we dont even touch this (hopefully?)
 type Presence struct {
 	User         *User        `json:"user"`
 	Status       Status       `json:"status"`
@@ -1461,10 +1199,6 @@ type Member struct {
 
 	// A list of IDs of the roles which are possessed by the member.
 	Roles []string `json:"roles"`
-
-	// The flags of this member. This is a combination of bit masks; the presence of a certain
-	// flag can be checked by performing a bitwise AND between this int and the flag.
-	Flags MemberFlags `json:"flags"`
 }
 
 // Mention creates a member mention
@@ -2204,13 +1938,6 @@ type StageInstance struct {
 	ChannelID string `json:"channel_id"`
 	// The topic of the Stage instance (1-120 characters)
 	Topic string `json:"topic"`
-	// The privacy level of the Stage instance
-	// https://discord.com/developers/docs/resources/stage-instance#stage-instance-object-privacy-level
-	PrivacyLevel StageInstancePrivacyLevel `json:"privacy_level"`
-	// Whether or not Stage Discovery is disabled (deprecated)
-	DiscoverableDisabled bool `json:"discoverable_disabled"`
-	// The id of the scheduled event for this Stage instance
-	GuildScheduledEventID string `json:"guild_scheduled_event_id"`
 }
 
 // StageInstanceParams represents the parameters needed to create or edit a stage instance
@@ -2219,10 +1946,6 @@ type StageInstanceParams struct {
 	ChannelID string `json:"channel_id,omitempty"`
 	// Topic of the Stage instance (1-120 characters)
 	Topic string `json:"topic,omitempty"`
-	// PrivacyLevel of the Stage instance (default GUILD_ONLY)
-	PrivacyLevel StageInstancePrivacyLevel `json:"privacy_level,omitempty"`
-	// SendStartNotification will notify @everyone that a Stage instance has started
-	SendStartNotification bool `json:"send_start_notification,omitempty"`
 }
 
 // StageInstancePrivacyLevel represents the privacy level of a Stage instance
@@ -2272,10 +1995,8 @@ type PollResults struct {
 
 // Poll contains all poll related data.
 type Poll struct {
-	Question         PollMedia      `json:"question"`
-	Answers          []PollAnswer   `json:"answers"`
-	AllowMultiselect bool           `json:"allow_multiselect"`
-	LayoutType       PollLayoutType `json:"layout_type,omitempty"`
+	Question PollMedia    `json:"question"`
+	Answers  []PollAnswer `json:"answers"`
 
 	// NOTE: should be set only on creation, when fetching use Expiry.
 	Duration int `json:"duration,omitempty"`

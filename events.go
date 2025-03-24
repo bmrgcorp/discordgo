@@ -212,21 +212,6 @@ type StageInstanceEventDelete struct {
 	*StageInstance
 }
 
-// GuildScheduledEventCreate is the data for a GuildScheduledEventCreate event.
-type GuildScheduledEventCreate struct {
-	*GuildScheduledEvent
-}
-
-// GuildScheduledEventUpdate is the data for a GuildScheduledEventUpdate event.
-type GuildScheduledEventUpdate struct {
-	*GuildScheduledEvent
-}
-
-// GuildScheduledEventDelete is the data for a GuildScheduledEventDelete event.
-type GuildScheduledEventDelete struct {
-	*GuildScheduledEvent
-}
-
 // GuildScheduledEventUserAdd is the data for a GuildScheduledEventUserAdd event.
 type GuildScheduledEventUserAdd struct {
 	GuildScheduledEventID string `json:"guild_scheduled_event_id"`

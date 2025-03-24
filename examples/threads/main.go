@@ -47,17 +47,17 @@ func main() {
 			}
 			games[m.ChannelID] = time.Now()
 			<-time.After(timeout)
-			if time.Since(games[m.ChannelID]) >= timeout {
-				archived := true
-				locked := true
-				_, err := s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
-					Archived: &archived,
-					Locked:   &locked,
-				})
-				if err != nil {
-					panic(err)
-				}
-			}
+			// if time.Since(games[m.ChannelID]) >= timeout {
+			// 	archived := true
+			// 	locked := true
+			// 	_, err := s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
+			// 		Archived: &archived,
+			// 		Locked:   &locked,
+			// 	})
+			// 	if err != nil {
+			// 		panic(err)
+			// 	}
+			// } we dont need this! - noah
 		}
 	})
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged)

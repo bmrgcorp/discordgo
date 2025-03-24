@@ -646,106 +646,6 @@ func (eh guildRoleUpdateEventHandler) Handle(s *Session, i interface{}) {
 	}
 }
 
-// guildScheduledEventCreateEventHandler is an event handler for GuildScheduledEventCreate events.
-type guildScheduledEventCreateEventHandler func(*Session, *GuildScheduledEventCreate)
-
-// Type returns the event type for GuildScheduledEventCreate events.
-func (eh guildScheduledEventCreateEventHandler) Type() string {
-	return guildScheduledEventCreateEventType
-}
-
-// New returns a new instance of GuildScheduledEventCreate.
-func (eh guildScheduledEventCreateEventHandler) New() interface{} {
-	return &GuildScheduledEventCreate{}
-}
-
-// Handle is the handler for GuildScheduledEventCreate events.
-func (eh guildScheduledEventCreateEventHandler) Handle(s *Session, i interface{}) {
-	if t, ok := i.(*GuildScheduledEventCreate); ok {
-		eh(s, t)
-	}
-}
-
-// guildScheduledEventDeleteEventHandler is an event handler for GuildScheduledEventDelete events.
-type guildScheduledEventDeleteEventHandler func(*Session, *GuildScheduledEventDelete)
-
-// Type returns the event type for GuildScheduledEventDelete events.
-func (eh guildScheduledEventDeleteEventHandler) Type() string {
-	return guildScheduledEventDeleteEventType
-}
-
-// New returns a new instance of GuildScheduledEventDelete.
-func (eh guildScheduledEventDeleteEventHandler) New() interface{} {
-	return &GuildScheduledEventDelete{}
-}
-
-// Handle is the handler for GuildScheduledEventDelete events.
-func (eh guildScheduledEventDeleteEventHandler) Handle(s *Session, i interface{}) {
-	if t, ok := i.(*GuildScheduledEventDelete); ok {
-		eh(s, t)
-	}
-}
-
-// guildScheduledEventUpdateEventHandler is an event handler for GuildScheduledEventUpdate events.
-type guildScheduledEventUpdateEventHandler func(*Session, *GuildScheduledEventUpdate)
-
-// Type returns the event type for GuildScheduledEventUpdate events.
-func (eh guildScheduledEventUpdateEventHandler) Type() string {
-	return guildScheduledEventUpdateEventType
-}
-
-// New returns a new instance of GuildScheduledEventUpdate.
-func (eh guildScheduledEventUpdateEventHandler) New() interface{} {
-	return &GuildScheduledEventUpdate{}
-}
-
-// Handle is the handler for GuildScheduledEventUpdate events.
-func (eh guildScheduledEventUpdateEventHandler) Handle(s *Session, i interface{}) {
-	if t, ok := i.(*GuildScheduledEventUpdate); ok {
-		eh(s, t)
-	}
-}
-
-// guildScheduledEventUserAddEventHandler is an event handler for GuildScheduledEventUserAdd events.
-type guildScheduledEventUserAddEventHandler func(*Session, *GuildScheduledEventUserAdd)
-
-// Type returns the event type for GuildScheduledEventUserAdd events.
-func (eh guildScheduledEventUserAddEventHandler) Type() string {
-	return guildScheduledEventUserAddEventType
-}
-
-// New returns a new instance of GuildScheduledEventUserAdd.
-func (eh guildScheduledEventUserAddEventHandler) New() interface{} {
-	return &GuildScheduledEventUserAdd{}
-}
-
-// Handle is the handler for GuildScheduledEventUserAdd events.
-func (eh guildScheduledEventUserAddEventHandler) Handle(s *Session, i interface{}) {
-	if t, ok := i.(*GuildScheduledEventUserAdd); ok {
-		eh(s, t)
-	}
-}
-
-// guildScheduledEventUserRemoveEventHandler is an event handler for GuildScheduledEventUserRemove events.
-type guildScheduledEventUserRemoveEventHandler func(*Session, *GuildScheduledEventUserRemove)
-
-// Type returns the event type for GuildScheduledEventUserRemove events.
-func (eh guildScheduledEventUserRemoveEventHandler) Type() string {
-	return guildScheduledEventUserRemoveEventType
-}
-
-// New returns a new instance of GuildScheduledEventUserRemove.
-func (eh guildScheduledEventUserRemoveEventHandler) New() interface{} {
-	return &GuildScheduledEventUserRemove{}
-}
-
-// Handle is the handler for GuildScheduledEventUserRemove events.
-func (eh guildScheduledEventUserRemoveEventHandler) Handle(s *Session, i interface{}) {
-	if t, ok := i.(*GuildScheduledEventUserRemove); ok {
-		eh(s, t)
-	}
-}
-
 // guildUpdateEventHandler is an event handler for GuildUpdate events.
 type guildUpdateEventHandler func(*Session, *GuildUpdate)
 
@@ -1563,16 +1463,6 @@ func handlerForInterface(handler interface{}) EventHandler {
 		return guildRoleDeleteEventHandler(v)
 	case func(*Session, *GuildRoleUpdate):
 		return guildRoleUpdateEventHandler(v)
-	case func(*Session, *GuildScheduledEventCreate):
-		return guildScheduledEventCreateEventHandler(v)
-	case func(*Session, *GuildScheduledEventDelete):
-		return guildScheduledEventDeleteEventHandler(v)
-	case func(*Session, *GuildScheduledEventUpdate):
-		return guildScheduledEventUpdateEventHandler(v)
-	case func(*Session, *GuildScheduledEventUserAdd):
-		return guildScheduledEventUserAddEventHandler(v)
-	case func(*Session, *GuildScheduledEventUserRemove):
-		return guildScheduledEventUserRemoveEventHandler(v)
 	case func(*Session, *GuildUpdate):
 		return guildUpdateEventHandler(v)
 	case func(*Session, *IntegrationCreate):
@@ -1681,11 +1571,6 @@ func init() {
 	registerInterfaceProvider(guildRoleCreateEventHandler(nil))
 	registerInterfaceProvider(guildRoleDeleteEventHandler(nil))
 	registerInterfaceProvider(guildRoleUpdateEventHandler(nil))
-	registerInterfaceProvider(guildScheduledEventCreateEventHandler(nil))
-	registerInterfaceProvider(guildScheduledEventDeleteEventHandler(nil))
-	registerInterfaceProvider(guildScheduledEventUpdateEventHandler(nil))
-	registerInterfaceProvider(guildScheduledEventUserAddEventHandler(nil))
-	registerInterfaceProvider(guildScheduledEventUserRemoveEventHandler(nil))
 	registerInterfaceProvider(guildUpdateEventHandler(nil))
 	registerInterfaceProvider(integrationCreateEventHandler(nil))
 	registerInterfaceProvider(integrationDeleteEventHandler(nil))

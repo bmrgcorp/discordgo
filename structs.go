@@ -390,9 +390,6 @@ type Channel struct {
 	// ID of the creator of the group DM or thread
 	OwnerID string `json:"owner_id"`
 
-	// ApplicationID of the DM creator Zeroed if guild channel or not a bot user
-	ApplicationID string `json:"application_id"`
-
 	// Thread member object for the current user, if they have joined the thread, only included on certain API endpoints
 	Member *ThreadMember `json:"thread_member"`
 
@@ -401,12 +398,6 @@ type Channel struct {
 
 	// Channel flags.
 	Flags ChannelFlags `json:"flags"`
-
-	// The set of tags that can be used in a forum channel.
-	AvailableTags []ForumTag `json:"available_tags"`
-
-	// The IDs of the set of tags that have been applied to a thread in a forum channel.
-	AppliedTags []string `json:"applied_tags"`
 }
 
 // Mention returns a string which mentions the channel
@@ -1039,19 +1030,11 @@ type Role struct {
 	// The name of the role.
 	Name string `json:"name"`
 
-	// Whether this role is mentionable.
-	Mentionable bool `json:"mentionable"`
-
 	// The hex color of this role.
 	Color int `json:"color"`
 
 	// The position of this role in the guild's role hierarchy.
 	Position int `json:"position"`
-
-	// The permissions of the role on the guild (doesn't include channel overrides).
-	// This is a combination of bit masks; the presence of a certain permission can
-	// be checked by performing a bitwise AND between this int and the permission.
-	Permissions int64 `json:"permissions,string"`
 }
 
 // RoleFlags represent the flags of a Role.
@@ -1191,9 +1174,6 @@ type Member struct {
 	// The hash of the avatar for the guild member, if any.
 	Avatar string `json:"avatar"`
 
-	// The hash of the banner for the guild member, if any.
-	Banner string `json:"banner"`
-
 	// The underlying user on which the member is based.
 	User *User `json:"user"`
 
@@ -1219,22 +1199,6 @@ func (m *Member) AvatarURL(size string) string {
 	return avatarURL(m.Avatar, "", EndpointGuildMemberAvatar(m.GuildID, m.User.ID, m.Avatar),
 		EndpointGuildMemberAvatarAnimated(m.GuildID, m.User.ID, m.Avatar), size)
 
-}
-
-// BannerURL returns the URL of the member's banner image.
-//
-//	size:    The size of the desired banner image as a power of two
-//	         Image size can be any power of two between 16 and 4096.
-func (m *Member) BannerURL(size string) string {
-	if m.Banner == "" {
-		return m.User.BannerURL(size)
-	}
-	return bannerURL(
-		m.Banner,
-		EndpointGuildMemberBanner(m.GuildID, m.User.ID, m.Banner),
-		EndpointGuildMemberBannerAnimated(m.GuildID, m.User.ID, m.Banner),
-		size,
-	)
 }
 
 // DisplayName returns the member's guild nickname if they have one,

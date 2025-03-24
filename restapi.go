@@ -516,22 +516,6 @@ func memberPermissions(guild *Guild, channel *Channel, userID string, roles []st
 		return
 	}
 
-	for _, role := range guild.Roles {
-		if role.ID == guild.ID {
-			apermissions |= role.Permissions
-			break
-		}
-	}
-
-	for _, role := range guild.Roles {
-		for _, roleID := range roles {
-			if role.ID == roleID {
-				apermissions |= role.Permissions
-				break
-			}
-		}
-	}
-
 	if apermissions&PermissionAdministrator == PermissionAdministrator {
 		apermissions |= PermissionAll
 	}

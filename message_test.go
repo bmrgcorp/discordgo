@@ -14,9 +14,8 @@ func TestContentWithMoreMentionsReplaced(t *testing.T) {
 
 	s.State.GuildAdd(&Guild{ID: "guild"})
 	s.State.RoleAdd("guild", &Role{
-		ID:          "role",
-		Name:        "Role Name",
-		Mentionable: true,
+		ID:   "role",
+		Name: "Role Name",
 	})
 	s.State.MemberAdd(&Member{
 		User:    user,

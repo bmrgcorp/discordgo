@@ -419,7 +419,8 @@ type ChannelEdit struct {
 	PermissionOverwrites []*PermissionOverwrite `json:"permission_overwrites,omitempty"`
 	ParentID             string                 `json:"parent_id,omitempty"`
 	Flags                *ChannelFlags          `json:"flags,omitempty"`
-
+	Archived            *bool `json:"archived,omitempty"`
+	Locked              *bool `json:"locked,omitempty"`
 	// NOTE: forum channels only
 
 	AvailableTags *[]ForumTag `json:"available_tags,omitempty"`

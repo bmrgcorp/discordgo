@@ -85,7 +85,8 @@ type Message struct {
 	// A list of attachments present in the message.
 	Attachments []*MessageAttachment `json:"attachments"`
 
-	// Components array removed for memory optimization
+	// A list of components present in the message.
+	Components []MessageComponent `json:"components"`
 
 	// A list of embeds present in the message.
 	Embeds []*MessageEmbed `json:"embeds"`

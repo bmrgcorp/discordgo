@@ -264,7 +264,7 @@ type SelectMenu struct {
 
 	Options  []SelectMenuOption `json:"options,omitempty"`
 	Disabled bool               `json:"disabled"`
-	Required *bool              `json:"required,omitempty"`
+	Required bool               `json:"required"`
 
 	// NOTE: Can only be used in SelectMenu with Channel menu type.
 	ChannelTypes []ChannelType `json:"channel_types,omitempty"`
@@ -304,7 +304,7 @@ type TextInput struct {
 	Style       TextInputStyle `json:"style"`
 	Placeholder string         `json:"placeholder,omitempty"`
 	Value       string         `json:"value,omitempty"`
-	Required    *bool          `json:"required,omitempty"`
+	Required    bool          `json:"required"`
 	MinLength   int            `json:"min_length,omitempty"`
 	MaxLength   int            `json:"max_length,omitempty"`
 
@@ -644,7 +644,7 @@ type FileUpload struct {
 	CustomID  string `json:"custom_id,omitempty"`
 	MinValues *int   `json:"min_values,omitempty"`
 	MaxValues int    `json:"max_values,omitempty"`
-	Required  *bool  `json:"required,omitempty"`
+	Required  bool  `json:"required"`
 
 	// List of values that is only populated when receiving an interaction response; do not fill this manually.
 	Values []string `json:"values,omitempty"`

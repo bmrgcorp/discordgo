@@ -87,8 +87,8 @@ type Session struct {
 	// Whether the UDP Connection is ready
 	UDPReady bool // NOTE: Deprecated
 
-	// Stores a mapping of guild id's to VoiceConnections
-	VoiceConnections map[string]*VoiceConnection
+	// VoiceConnections map removed for memory optimization
+	VoiceConnections map[string]interface{}
 
 	// Managed state object, updated internally with events when
 	// StateEnabled is true.
@@ -815,24 +815,15 @@ type Guild struct {
 	// The default message notification setting for the guild.
 	DefaultMessageNotifications MessageNotifications `json:"default_message_notifications"`
 
-	// A list of roles in the guild.
-	Roles []*Role `json:"roles"`
+	// Roles array removed for memory optimization
 
-	// A list of the custom emojis present in the guild.
-	Emojis []*Emoji `json:"emojis"`
+	// Emojis array removed for memory optimization
 
-	// A list of the custom stickers present in the guild.
-	Stickers []*Sticker `json:"stickers"`
+	// Stickers array removed for memory optimization
 
-	// A list of the members in the guild.
-	// This field is only present in GUILD_CREATE events and websocket
-	// update events, and thus is only present in state-cached guilds.
-	Members []*Member `json:"members"`
+	// Members array removed for memory optimization
 
-	// A list of partial presence objects for members in the guild.
-	// This field is only present in GUILD_CREATE events and websocket
-	// update events, and thus is only present in state-cached guilds.
-	Presences []*Presence `json:"presences"`
+	// Presences array removed for memory optimization
 
 	// The maximum number of presences for the guild (the default value, currently 25000, is in effect when null is returned)
 	MaxPresences int `json:"max_presences"`
@@ -840,20 +831,11 @@ type Guild struct {
 	// The maximum number of members for the guild
 	MaxMembers int `json:"max_members"`
 
-	// A list of channels in the guild.
-	// This field is only present in GUILD_CREATE events and websocket
-	// update events, and thus is only present in state-cached guilds.
-	Channels []*Channel `json:"channels"`
+	// Channels array removed for memory optimization
 
-	// A list of all active threads in the guild that current user has permission to view
-	// This field is only present in GUILD_CREATE events and websocket
-	// update events and thus is only present in state-cached guilds.
-	Threads []*Channel `json:"threads"`
+	// Threads array removed for memory optimization
 
-	// A list of voice states for the guild.
-	// This field is only present in GUILD_CREATE events and websocket
-	// update events, and thus is only present in state-cached guilds.
-	VoiceStates []*VoiceState `json:"voice_states"`
+	// VoiceStates array removed for memory optimization
 
 	// Whether this guild is currently unavailable (most likely due to outage).
 	// This field is only present in GUILD_CREATE events and websocket
@@ -866,8 +848,7 @@ type Guild struct {
 	// The NSFW Level of the guild
 	NSFWLevel GuildNSFWLevel `json:"nsfw_level"`
 
-	// The list of enabled guild features
-	Features []GuildFeature `json:"features"`
+	// Features array removed for memory optimization
 
 	// Required MFA level for the guild
 	MfaLevel MfaLevel `json:"mfa_level"`
@@ -923,8 +904,7 @@ type Guild struct {
 	// Permissions of our user
 	Permissions int64 `json:"permissions,string"`
 
-	// Stage instances in the guild
-	StageInstances []*StageInstance `json:"stage_instances"`
+	// StageInstances array removed for memory optimization
 }
 
 // A GuildPreview holds data related to a specific public Discord Guild, even if the user is not in the guild.

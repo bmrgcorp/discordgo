@@ -203,6 +203,7 @@ func (s *Session) handleEvent(t string, i interface{}) {
 // setGuildIds will set the GuildID on all the members of a guild.
 // This is done as event data does not have it set.
 func setGuildIds(g *Guild) {
+	/*
 	for _, c := range g.Channels {
 		c.GuildID = g.ID
 	}
@@ -214,6 +215,7 @@ func setGuildIds(g *Guild) {
 	for _, vs := range g.VoiceStates {
 		vs.GuildID = g.ID
 	}
+	*/
 }
 
 // onInterface handles all internal events and routes them to the appropriate internal handler.
@@ -229,9 +231,9 @@ func (s *Session) onInterface(i interface{}) {
 	case *GuildUpdate:
 		setGuildIds(t.Guild)
 	case *VoiceServerUpdate:
-		go s.onVoiceServerUpdate(t)
+		// go s.onVoiceServerUpdate(t)
 	case *VoiceStateUpdate:
-		go s.onVoiceStateUpdate(t)
+		// go s.onVoiceStateUpdate(t)
 	}
 	err := s.State.OnInterface(s, i)
 	if err != nil {

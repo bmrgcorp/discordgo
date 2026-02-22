@@ -330,10 +330,8 @@ type MessageReactionRemoveEmoji struct {
 type PresencesReplace []*Presence
 
 // PresenceUpdate is the data for a PresenceUpdate event.
-type PresenceUpdate struct {
-	Presence
-	GuildID string `json:"guild_id"`
-}
+type PresenceUpdate struct{}
+
 
 // Resumed is the data for a Resumed event.
 type Resumed struct {
@@ -341,12 +339,8 @@ type Resumed struct {
 }
 
 // TypingStart is the data for a TypingStart event.
-type TypingStart struct {
-	UserID    string `json:"user_id"`
-	ChannelID string `json:"channel_id"`
-	GuildID   string `json:"guild_id,omitempty"`
-	Timestamp int    `json:"timestamp"`
-}
+type TypingStart struct{}
+
 
 // UserUpdate is the data for a UserUpdate event.
 type UserUpdate struct {
@@ -354,18 +348,12 @@ type UserUpdate struct {
 }
 
 // VoiceServerUpdate is the data for a VoiceServerUpdate event.
-type VoiceServerUpdate struct {
-	Token    string `json:"token"`
-	GuildID  string `json:"guild_id"`
-	Endpoint string `json:"endpoint"`
-}
+type VoiceServerUpdate struct{}
+
 
 // VoiceStateUpdate is the data for a VoiceStateUpdate event.
-type VoiceStateUpdate struct {
-	*VoiceState
-	// BeforeUpdate will be nil if the VoiceState was not previously cached in the state cache.
-	BeforeUpdate *VoiceState `json:"-"`
-}
+type VoiceStateUpdate struct{}
+
 
 // MessageDeleteBulk is the data for a MessageDeleteBulk event
 type MessageDeleteBulk struct {

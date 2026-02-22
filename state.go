@@ -14,7 +14,6 @@ package discordgo
 
 import (
 	"errors"
-	"sort"
 	"sync"
 )
 
@@ -77,11 +76,7 @@ func NewState() *State {
 }
 
 func (s *State) createMemberMap(guild *Guild) {
-	members := make(map[string]*Member)
-	for _, m := range guild.Members {
-		members[m.User.ID] = m
-	}
-	s.memberMap[guild.ID] = members
+	// Disabled for memory optimization
 }
 
 // GuildAdd adds a guild to the current world state, or
@@ -95,6 +90,7 @@ func (s *State) GuildAdd(guild *Guild) error {
 	defer s.Unlock()
 
 	// Update the channels to point to the right guild, adding them to the channelMap as we go
+	/*
 	for _, c := range guild.Channels {
 		s.channelMap[c.ID] = c
 	}
@@ -103,41 +99,23 @@ func (s *State) GuildAdd(guild *Guild) error {
 	for _, t := range guild.Threads {
 		s.channelMap[t.ID] = t
 	}
+	*/
 
 	// If this guild contains a new member slice, we must regenerate the member map so the pointers stay valid
+	/*
 	if guild.Members != nil {
 		s.createMemberMap(guild)
 	} else if _, ok := s.memberMap[guild.ID]; !ok {
 		// Even if we have no new member slice, we still initialize the member map for this guild if it doesn't exist
 		s.memberMap[guild.ID] = make(map[string]*Member)
 	}
+	*/
 
 	if g, ok := s.guildMap[guild.ID]; ok {
 		// We are about to replace `g` in the state with `guild`, but first we need to
 		// make sure we preserve any fields that the `guild` doesn't contain from `g`.
 		if guild.MemberCount == 0 {
 			guild.MemberCount = g.MemberCount
-		}
-		if guild.Roles == nil {
-			guild.Roles = g.Roles
-		}
-		if guild.Emojis == nil {
-			guild.Emojis = g.Emojis
-		}
-		if guild.Members == nil {
-			guild.Members = g.Members
-		}
-		if guild.Presences == nil {
-			guild.Presences = g.Presences
-		}
-		if guild.Channels == nil {
-			guild.Channels = g.Channels
-		}
-		if guild.Threads == nil {
-			guild.Threads = g.Threads
-		}
-		if guild.VoiceStates == nil {
-			guild.VoiceStates = g.VoiceStates
 		}
 		*g = *guild
 		return nil
@@ -195,55 +173,6 @@ func (s *State) Guild(guildID string) (*Guild, error) {
 }
 
 func (s *State) presenceAdd(guildID string, presence *Presence) error {
-	guild, ok := s.guildMap[guildID]
-	if !ok {
-		return ErrStateNotFound
-	}
-
-	for i, p := range guild.Presences {
-		if p.User.ID == presence.User.ID {
-			//guild.Presences[i] = presence
-
-			//Update status
-			guild.Presences[i].Activities = presence.Activities
-			if presence.Status != "" {
-				guild.Presences[i].Status = presence.Status
-			}
-			if presence.ClientStatus.Desktop != "" {
-				guild.Presences[i].ClientStatus.Desktop = presence.ClientStatus.Desktop
-			}
-			if presence.ClientStatus.Mobile != "" {
-				guild.Presences[i].ClientStatus.Mobile = presence.ClientStatus.Mobile
-			}
-			if presence.ClientStatus.Web != "" {
-				guild.Presences[i].ClientStatus.Web = presence.ClientStatus.Web
-			}
-
-			//Update the optionally sent user information
-			//ID Is a mandatory field so you should not need to check if it is empty
-			guild.Presences[i].User.ID = presence.User.ID
-
-			if presence.User.Avatar != "" {
-				guild.Presences[i].User.Avatar = presence.User.Avatar
-			}
-			if presence.User.Discriminator != "" {
-				guild.Presences[i].User.Discriminator = presence.User.Discriminator
-			}
-			if presence.User.Email != "" {
-				guild.Presences[i].User.Email = presence.User.Email
-			}
-			if presence.User.Token != "" {
-				guild.Presences[i].User.Token = presence.User.Token
-			}
-			if presence.User.Username != "" {
-				guild.Presences[i].User.Username = presence.User.Username
-			}
-
-			return nil
-		}
-	}
-
-	guild.Presences = append(guild.Presences, presence)
 	return nil
 }
 
@@ -262,73 +191,17 @@ func (s *State) PresenceAdd(guildID string, presence *Presence) error {
 
 // PresenceRemove removes a presence from the current world state.
 func (s *State) PresenceRemove(guildID string, presence *Presence) error {
-	if s == nil {
-		return ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return err
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	for i, p := range guild.Presences {
-		if p.User.ID == presence.User.ID {
-			guild.Presences = append(guild.Presences[:i], guild.Presences[i+1:]...)
-			return nil
-		}
-	}
-
-	return ErrStateNotFound
+	return nil
 }
 
 // Presence gets a presence by ID from a guild.
 func (s *State) Presence(guildID, userID string) (*Presence, error) {
-	if s == nil {
-		return nil, ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, p := range guild.Presences {
-		if p.User.ID == userID {
-			return p, nil
-		}
-	}
-
 	return nil, ErrStateNotFound
 }
 
 // TODO: Consider moving Guild state update methods onto *Guild.
 
 func (s *State) memberAdd(member *Member) error {
-	guild, ok := s.guildMap[member.GuildID]
-	if !ok {
-		return ErrStateNotFound
-	}
-
-	members, ok := s.memberMap[member.GuildID]
-	if !ok {
-		return ErrStateNotFound
-	}
-
-	m, ok := members[member.User.ID]
-	if !ok {
-		members[member.User.ID] = member
-		guild.Members = append(guild.Members, member)
-	} else {
-		// We are about to replace `m` in the state with `member`, but first we need to
-		// make sure we preserve any fields that the `member` doesn't contain from `m`.
-		if member.JoinedAt.IsZero() {
-			member.JoinedAt = m.JoinedAt
-		}
-		*m = *member
-	}
 	return nil
 }
 
@@ -347,37 +220,7 @@ func (s *State) MemberAdd(member *Member) error {
 
 // MemberRemove removes a member from current world state.
 func (s *State) MemberRemove(member *Member) error {
-	if s == nil {
-		return ErrNilState
-	}
-
-	guild, err := s.Guild(member.GuildID)
-	if err != nil {
-		return err
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	members, ok := s.memberMap[member.GuildID]
-	if !ok {
-		return ErrStateNotFound
-	}
-
-	_, ok = members[member.User.ID]
-	if !ok {
-		return ErrStateNotFound
-	}
-	delete(members, member.User.ID)
-
-	for i, m := range guild.Members {
-		if m.User.ID == member.User.ID {
-			guild.Members = append(guild.Members[:i], guild.Members[i+1:]...)
-			return nil
-		}
-	}
-
-	return ErrStateNotFound
+	return nil
 }
 
 // Member gets a member by ID from a guild.
@@ -405,73 +248,16 @@ func (s *State) Member(guildID, userID string) (*Member, error) {
 // RoleAdd adds a role to the current world state, or
 // updates it if it already exists.
 func (s *State) RoleAdd(guildID string, role *Role) error {
-	if s == nil {
-		return ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return err
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	for i, r := range guild.Roles {
-		if r.ID == role.ID {
-			guild.Roles[i] = role
-			return nil
-		}
-	}
-
-	guild.Roles = append(guild.Roles, role)
 	return nil
 }
 
 // RoleRemove removes a role from current world state by ID.
 func (s *State) RoleRemove(guildID, roleID string) error {
-	if s == nil {
-		return ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return err
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	for i, r := range guild.Roles {
-		if r.ID == roleID {
-			guild.Roles = append(guild.Roles[:i], guild.Roles[i+1:]...)
-			return nil
-		}
-	}
-
-	return ErrStateNotFound
+	return nil
 }
 
 // Role gets a role by ID from a guild.
 func (s *State) Role(guildID, roleID string) (*Role, error) {
-	if s == nil {
-		return nil, ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return nil, err
-	}
-
-	s.RLock()
-	defer s.RUnlock()
-
-	for _, r := range guild.Roles {
-		if r.ID == roleID {
-			return r, nil
-		}
-	}
-
 	return nil, ErrStateNotFound
 }
 
@@ -509,17 +295,7 @@ func (s *State) ChannelAdd(channel *Channel) error {
 		return nil
 	}
 
-	guild, ok := s.guildMap[channel.GuildID]
-	if !ok {
-		return ErrStateNotFound
-	}
-
-	if channel.IsThread() {
-		guild.Threads = append(guild.Threads, channel)
-	} else {
-		guild.Channels = append(guild.Channels, channel)
-	}
-
+	// Guild channel tracking disabled for memory optimization
 	s.channelMap[channel.ID] = channel
 
 	return nil
@@ -529,11 +305,6 @@ func (s *State) ChannelAdd(channel *Channel) error {
 func (s *State) ChannelRemove(channel *Channel) error {
 	if s == nil {
 		return ErrNilState
-	}
-
-	_, err := s.Channel(channel.ID)
-	if err != nil {
-		return err
 	}
 
 	if channel.Type == ChannelTypeDM || channel.Type == ChannelTypeGroupDM {
@@ -550,29 +321,8 @@ func (s *State) ChannelRemove(channel *Channel) error {
 		return nil
 	}
 
-	guild, err := s.Guild(channel.GuildID)
-	if err != nil {
-		return err
-	}
-
 	s.Lock()
 	defer s.Unlock()
-
-	if channel.IsThread() {
-		for i, t := range guild.Threads {
-			if t.ID == channel.ID {
-				guild.Threads = append(guild.Threads[:i], guild.Threads[i+1:]...)
-				break
-			}
-		}
-	} else {
-		for i, c := range guild.Channels {
-			if c.ID == channel.ID {
-				guild.Channels = append(guild.Channels[:i], guild.Channels[i+1:]...)
-				break
-			}
-		}
-	}
 
 	delete(s.channelMap, channel.ID)
 
@@ -581,45 +331,6 @@ func (s *State) ChannelRemove(channel *Channel) error {
 
 // ThreadListSync syncs guild threads with provided ones.
 func (s *State) ThreadListSync(tls *ThreadListSync) error {
-	guild, err := s.Guild(tls.GuildID)
-	if err != nil {
-		return err
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	// This algorithm filters out archived or
-	// threads which are children of channels in channelIDs
-	// and then it adds all synced threads to guild threads and cache
-	index := 0
-outer:
-	for _, t := range guild.Threads {
-		if !t.ThreadMetadata.Archived && tls.ChannelIDs != nil {
-			for _, v := range tls.ChannelIDs {
-				if t.ParentID == v {
-					delete(s.channelMap, t.ID)
-					continue outer
-				}
-			}
-			guild.Threads[index] = t
-			index++
-		} else {
-			delete(s.channelMap, t.ID)
-		}
-	}
-	guild.Threads = guild.Threads[:index]
-	for _, t := range tls.Threads {
-		s.channelMap[t.ID] = t
-		guild.Threads = append(guild.Threads, t)
-	}
-
-	for _, m := range tls.Members {
-		if c, ok := s.channelMap[m.ID]; ok {
-			c.Member = m
-		}
-	}
-
 	return nil
 }
 
@@ -690,49 +401,11 @@ func (s *State) Channel(channelID string) (*Channel, error) {
 
 // Emoji returns an emoji for a guild and emoji id.
 func (s *State) Emoji(guildID, emojiID string) (*Emoji, error) {
-	if s == nil {
-		return nil, ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return nil, err
-	}
-
-	s.RLock()
-	defer s.RUnlock()
-
-	for _, e := range guild.Emojis {
-		if e.ID == emojiID {
-			return e, nil
-		}
-	}
-
 	return nil, ErrStateNotFound
 }
 
 // EmojiAdd adds an emoji to the current world state.
 func (s *State) EmojiAdd(guildID string, emoji *Emoji) error {
-	if s == nil {
-		return ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return err
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	for i, e := range guild.Emojis {
-		if e.ID == emoji.ID {
-			guild.Emojis[i] = emoji
-			return nil
-		}
-	}
-
-	guild.Emojis = append(guild.Emojis, emoji)
 	return nil
 }
 
@@ -786,9 +459,7 @@ func (s *State) MessageAdd(message *Message) error {
 			if message.Author != nil {
 				m.Author = message.Author
 			}
-			if message.Components != nil {
-				m.Components = message.Components
-			}
+
 
 			return nil
 		}
@@ -834,53 +505,11 @@ func (s *State) messageRemoveByID(channelID, messageID string) error {
 }
 
 func (s *State) voiceStateUpdate(update *VoiceStateUpdate) error {
-	guild, err := s.Guild(update.GuildID)
-	if err != nil {
-		return err
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	// Handle Leaving Channel
-	if update.ChannelID == "" {
-		for i, state := range guild.VoiceStates {
-			if state.UserID == update.UserID {
-				guild.VoiceStates = append(guild.VoiceStates[:i], guild.VoiceStates[i+1:]...)
-				return nil
-			}
-		}
-	} else {
-		for i, state := range guild.VoiceStates {
-			if state.UserID == update.UserID {
-				guild.VoiceStates[i] = update.VoiceState
-				return nil
-			}
-		}
-
-		guild.VoiceStates = append(guild.VoiceStates, update.VoiceState)
-	}
-
 	return nil
 }
 
 // VoiceState gets a VoiceState by guild and user ID.
 func (s *State) VoiceState(guildID, userID string) (*VoiceState, error) {
-	if s == nil {
-		return nil, ErrNilState
-	}
-
-	guild, err := s.Guild(guildID)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, state := range guild.VoiceStates {
-		if state.UserID == userID {
-			return state, nil
-		}
-	}
-
 	return nil, ErrStateNotFound
 }
 
@@ -937,10 +566,6 @@ func (s *State) onReady(se *Session, r *Ready) (err error) {
 	for _, g := range s.Guilds {
 		s.guildMap[g.ID] = g
 		s.createMemberMap(g)
-
-		for _, c := range g.Channels {
-			s.channelMap[c.ID] = c
-		}
 	}
 
 	for _, c := range s.PrivateChannels {
@@ -1060,27 +685,9 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 			err = s.RoleRemove(t.GuildID, t.RoleID)
 		}
 	case *GuildEmojisUpdate:
-		if s.TrackEmojis {
-			var guild *Guild
-			guild, err = s.Guild(t.GuildID)
-			if err != nil {
-				return err
-			}
-			s.Lock()
-			defer s.Unlock()
-			guild.Emojis = t.Emojis
-		}
+		// Disabled for memory optimization
 	case *GuildStickersUpdate:
-		if s.TrackStickers {
-			var guild *Guild
-			guild, err = s.Guild(t.GuildID)
-			if err != nil {
-				return err
-			}
-			s.Lock()
-			defer s.Unlock()
-			guild.Stickers = t.Stickers
-		}
+		// Disabled for memory optimization
 	case *ChannelCreate:
 		if s.TrackChannels {
 			err = s.ChannelAdd(t.Channel)
@@ -1170,169 +777,31 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 			}
 		}
 	case *VoiceStateUpdate:
-		if s.TrackVoice {
-			var old *VoiceState
-			old, err = s.VoiceState(t.GuildID, t.UserID)
-			if err == nil {
-				oldCopy := *old
-				t.BeforeUpdate = &oldCopy
-			}
-
-			err = s.voiceStateUpdate(t)
-		}
+		// Disabled for memory optimization
 	case *PresenceUpdate:
-		if s.TrackPresences {
-			s.PresenceAdd(t.GuildID, &t.Presence)
-		}
-		if s.TrackMembers {
-			if t.Status == StatusOffline {
-				return
-			}
-
-			var m *Member
-			m, err = s.Member(t.GuildID, t.User.ID)
-
-			if err != nil {
-				// Member not found; this is a user coming online
-				m = &Member{
-					GuildID: t.GuildID,
-					User:    t.User,
-				}
-			} else {
-				if t.User.Username != "" {
-					m.User.Username = t.User.Username
-				}
-			}
-
-			err = s.MemberAdd(m)
-		}
+		// Disabled for memory optimization
 
 	}
 
 	return
 }
 
-// UserChannelPermissions returns the permission of a user in a channel.
-// userID    : The ID of the user to calculate permissions for.
-// channelID : The ID of the channel to calculate permission for.
 func (s *State) UserChannelPermissions(userID, channelID string) (apermissions int64, err error) {
-	if s == nil {
-		return 0, ErrNilState
-	}
-
-	channel, err := s.Channel(channelID)
-	if err != nil {
-		return
-	}
-
-	guild, err := s.Guild(channel.GuildID)
-	if err != nil {
-		return
-	}
-
-	member, err := s.Member(guild.ID, userID)
-	if err != nil {
-		return
-	}
-
-	return memberPermissions(guild, channel, userID, member.Roles), nil
+	return 0, nil
 }
 
-// MessagePermissions returns the permissions of the author of the message
-// in the channel in which it was sent.
 func (s *State) MessagePermissions(message *Message) (apermissions int64, err error) {
-	if s == nil {
-		return 0, ErrNilState
-	}
-
-	if message.Author == nil || message.Member == nil {
-		return 0, ErrMessageIncompletePermissions
-	}
-
-	channel, err := s.Channel(message.ChannelID)
-	if err != nil {
-		return
-	}
-
-	guild, err := s.Guild(channel.GuildID)
-	if err != nil {
-		return
-	}
-
-	return memberPermissions(guild, channel, message.Author.ID, message.Member.Roles), nil
+	return 0, nil
 }
 
-// UserColor returns the color of a user in a channel.
-// While colors are defined at a Guild level, determining for a channel is more useful in message handlers.
-// 0 is returned in cases of error, which is the color of @everyone.
-// userID    : The ID of the user to calculate the color for.
-// channelID   : The ID of the channel to calculate the color for.
 func (s *State) UserColor(userID, channelID string) int {
-	if s == nil {
-		return 0
-	}
-
-	channel, err := s.Channel(channelID)
-	if err != nil {
-		return 0
-	}
-
-	guild, err := s.Guild(channel.GuildID)
-	if err != nil {
-		return 0
-	}
-
-	member, err := s.Member(guild.ID, userID)
-	if err != nil {
-		return 0
-	}
-
-	return firstRoleColorColor(guild, member.Roles)
+	return 0
 }
 
-// MessageColor returns the color of the author's name as displayed
-// in the client associated with this message.
 func (s *State) MessageColor(message *Message) int {
-	if s == nil {
-		return 0
-	}
-
-	if message.Member == nil || message.Member.Roles == nil {
-		return 0
-	}
-
-	channel, err := s.Channel(message.ChannelID)
-	if err != nil {
-		return 0
-	}
-
-	guild, err := s.Guild(channel.GuildID)
-	if err != nil {
-		return 0
-	}
-
-	return firstRoleColorColor(guild, message.Member.Roles)
+	return 0
 }
 
 func firstRoleColorColor(guild *Guild, memberRoles []string) int {
-	roles := Roles(guild.Roles)
-	sort.Sort(roles)
-
-	for _, role := range roles {
-		for _, roleID := range memberRoles {
-			if role.ID == roleID {
-				if role.Color != 0 {
-					return role.Color
-				}
-			}
-		}
-	}
-
-	for _, role := range roles {
-		if role.ID == guild.ID {
-			return role.Color
-		}
-	}
-
 	return 0
 }

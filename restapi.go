@@ -476,110 +476,13 @@ func (s *Session) UserGuilds(limit int, beforeID, afterID string, withCounts boo
 // NOTE: This function is now deprecated and will be removed in the future.
 // Please see the same function inside state.go
 func (s *Session) UserChannelPermissions(userID, channelID string, fetchOptions ...RequestOption) (apermissions int64, err error) {
-	// Try to just get permissions from state.
-	apermissions, err = s.State.UserChannelPermissions(userID, channelID)
-	if err == nil {
-		return
-	}
-
-	// Otherwise try get as much data from state as possible, falling back to the network.
-	channel, err := s.State.Channel(channelID)
-	if err != nil || channel == nil {
-		channel, err = s.Channel(channelID, fetchOptions...)
-		if err != nil {
-			return
-		}
-	}
-
-	guild, err := s.State.Guild(channel.GuildID)
-	if err != nil || guild == nil {
-		guild, err = s.Guild(channel.GuildID, fetchOptions...)
-		if err != nil {
-			return
-		}
-	}
-
-	if userID == guild.OwnerID {
-		apermissions = PermissionAll
-		return
-	}
-
-	member, err := s.State.Member(guild.ID, userID)
-	if err != nil || member == nil {
-		member, err = s.GuildMember(guild.ID, userID, fetchOptions...)
-		if err != nil {
-			return
-		}
-	}
-
-	return memberPermissions(guild, channel, userID, member.Roles), nil
+	return 0, fmt.Errorf("UserChannelPermissions is disabled for memory optimization")
 }
 
 // Calculates the permissions for a member.
 // https://support.discord.com/hc/en-us/articles/206141927-How-is-the-permission-hierarchy-structured-
 func memberPermissions(guild *Guild, channel *Channel, userID string, roles []string) (apermissions int64) {
-	if userID == guild.OwnerID {
-		apermissions = PermissionAll
-		return
-	}
-
-	for _, role := range guild.Roles {
-		if role.ID == guild.ID {
-			apermissions |= role.Permissions
-			break
-		}
-	}
-
-	for _, role := range guild.Roles {
-		for _, roleID := range roles {
-			if role.ID == roleID {
-				apermissions |= role.Permissions
-				break
-			}
-		}
-	}
-
-	if apermissions&PermissionAdministrator == PermissionAdministrator {
-		apermissions |= PermissionAll
-	}
-
-	// Apply @everyone overrides from the channel.
-	for _, overwrite := range channel.PermissionOverwrites {
-		if guild.ID == overwrite.ID {
-			apermissions &= ^overwrite.Deny
-			apermissions |= overwrite.Allow
-			break
-		}
-	}
-
-	var denies, allows int64
-	// Member overwrites can override role overrides, so do two passes
-	for _, overwrite := range channel.PermissionOverwrites {
-		for _, roleID := range roles {
-			if overwrite.Type == PermissionOverwriteTypeRole && roleID == overwrite.ID {
-				denies |= overwrite.Deny
-				allows |= overwrite.Allow
-				break
-			}
-		}
-	}
-
-	apermissions &= ^denies
-	apermissions |= allows
-
-	for _, overwrite := range channel.PermissionOverwrites {
-		if overwrite.Type == PermissionOverwriteTypeMember && overwrite.ID == userID {
-			apermissions &= ^overwrite.Deny
-			apermissions |= overwrite.Allow
-			break
-		}
-	}
-
-	if apermissions&PermissionAdministrator == PermissionAdministrator {
-		apermissions |= PermissionAllChannel
-	}
-
-	return apermissions
+	return 0
 }
 
 // ------------------------------------------------------------------------------------------------

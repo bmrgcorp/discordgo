@@ -77,18 +77,7 @@ func (s *Session) log(msgL int, format string, a ...interface{}) {
 	msglog(msgL, 2, format, a...)
 }
 
-// helper function that wraps msglog for the VoiceConnection struct
-// This adds a check to insure the message is only logged
-// if the voice connection log level is equal or higher than the
-// message log level
-func (v *VoiceConnection) log(msgL int, format string, a ...interface{}) {
 
-	if msgL > v.LogLevel {
-		return
-	}
-
-	msglog(msgL, 2, format, a...)
-}
 
 // printJSON is a helper function to display JSON data in an easy to read format.
 /* NOT USED ATM

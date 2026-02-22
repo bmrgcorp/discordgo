@@ -85,8 +85,7 @@ type Message struct {
 	// A list of attachments present in the message.
 	Attachments []*MessageAttachment `json:"attachments"`
 
-	// A list of components attached to the message.
-	Components []MessageComponent `json:"-"`
+	// Components array removed for memory optimization
 
 	// A list of embeds present in the message.
 	Embeds []*MessageEmbed `json:"embeds"`
@@ -94,8 +93,7 @@ type Message struct {
 	// A list of users mentioned in the message.
 	Mentions []*User `json:"mentions"`
 
-	// A list of reactions to the message.
-	Reactions []*MessageReactions `json:"reactions"`
+	// Reactions array removed for memory optimization
 
 	// Whether the message is pinned or not.
 	Pinned bool `json:"pinned"`
@@ -117,11 +115,8 @@ type Message struct {
 	// If no mentions in the message meet these requirements, this field will not be sent.
 	MentionChannels []*Channel `json:"mention_channels"`
 
-	// Is sent with Rich Presence-related chat embeds
-	Activity *MessageActivity `json:"activity"`
-
-	// Is sent with Rich Presence-related chat embeds
-	Application *MessageApplication `json:"application"`
+	// Activity removed for memory optimization
+	// Application removed for memory optimization
 
 	// MessageReference contains reference data sent with crossposted or reply messages.
 	// This does not contain the reference *to* this message; this is for when *this* message references another.
@@ -156,8 +151,7 @@ type Message struct {
 	// The thread that was started from this message, includes thread member object
 	Thread *Channel `json:"thread,omitempty"`
 
-	// An array of StickerItem objects, representing sent stickers, if there were any.
-	StickerItems []*StickerItem `json:"sticker_items"`
+	// StickerItems array removed for memory optimization
 
 	// A poll object.
 	Poll *Poll `json:"poll"`
@@ -166,19 +160,12 @@ type Message struct {
 // UnmarshalJSON is a helper function to unmarshal the Message.
 func (m *Message) UnmarshalJSON(data []byte) error {
 	type message Message
-	var v struct {
-		message
-		RawComponents []unmarshalableMessageComponent `json:"components"`
-	}
+	var v message
 	err := json.Unmarshal(data, &v)
 	if err != nil {
 		return err
 	}
-	*m = Message(v.message)
-	m.Components = make([]MessageComponent, len(v.RawComponents))
-	for i, v := range v.RawComponents {
-		m.Components[i] = v.MessageComponent
-	}
+	*m = Message(v)
 	return err
 }
 

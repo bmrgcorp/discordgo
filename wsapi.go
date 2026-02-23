@@ -18,10 +18,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/websocket"
+)
+
+var (
+	identifyMu   sync.Mutex
+	lastIdentify time.Time
 )
 
 // ErrWSAlreadyOpen is thrown when you attempt to open
@@ -153,7 +159,9 @@ func (s *Session) Open() error {
 
 		s.log(LogInformational, "sending resume packet to gateway")
 		s.wsMutex.Lock()
+		_ = s.wsConn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 		err = s.wsConn.WriteJSON(p)
+		_ = s.wsConn.SetWriteDeadline(time.Time{})
 		s.wsMutex.Unlock()
 		if err != nil {
 			err = fmt.Errorf("error sending gateway resume packet, %s, %s", s.gateway, err)
@@ -209,6 +217,8 @@ func (s *Session) Open() error {
 	// Start sending heartbeats and reading messages from Discord.
 	go s.heartbeat(s.wsConn, s.listening, h.HeartbeatInterval)
 	go s.listen(s.wsConn, s.listening)
+
+	s.log(LogInformational, "Shard %d connected to Gateway: %s", s.ShardID, s.gateway)
 
 	s.log(LogInformational, "exiting")
 	return nil
@@ -271,8 +281,8 @@ type helloOp struct {
 	HeartbeatInterval time.Duration `json:"heartbeat_interval"`
 }
 
-// FailedHeartbeatAcks is the Number of heartbeat intervals to wait until forcing a connection restart.
-const FailedHeartbeatAcks time.Duration = 5 * time.Millisecond
+// FailedHeartbeatAcks is the number of heartbeat intervals to wait until forcing a connection restart.
+const FailedHeartbeatAcks = 5
 
 // HeartbeatLatency returns the latency between heartbeat acknowledgement and heartbeat send.
 func (s *Session) HeartbeatLatency() time.Duration {
@@ -293,7 +303,7 @@ func (s *Session) heartbeat(wsConn *websocket.Conn, listening <-chan interface{}
 	}
 
 	var err error
-	ticker := time.NewTicker(heartbeatIntervalMsec * time.Millisecond)
+	ticker := time.NewTicker(heartbeatIntervalMsec * 1000000)
 	defer ticker.Stop()
 
 	for {
@@ -304,9 +314,11 @@ func (s *Session) heartbeat(wsConn *websocket.Conn, listening <-chan interface{}
 		s.log(LogDebug, "sending gateway websocket heartbeat seq %d", sequence)
 		s.wsMutex.Lock()
 		s.LastHeartbeatSent = time.Now().UTC()
+		_ = wsConn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 		err = wsConn.WriteJSON(heartbeatOp{1, sequence})
+		_ = wsConn.SetWriteDeadline(time.Time{})
 		s.wsMutex.Unlock()
-		if err != nil || time.Now().UTC().Sub(last) > (heartbeatIntervalMsec*FailedHeartbeatAcks) {
+		if err != nil || time.Now().UTC().Sub(last) > (heartbeatIntervalMsec * 1000000 * FailedHeartbeatAcks) {
 			if err != nil {
 				s.log(LogError, "error sending heartbeat to gateway %s, %s", s.gateway, err)
 			} else {
@@ -439,7 +451,9 @@ func (s *Session) UpdateStatusComplex(usd UpdateStatusData) (err error) {
 	}
 
 	s.wsMutex.Lock()
+	_ = s.wsConn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 	err = s.wsConn.WriteJSON(updateStatusOp{3, usd})
+	_ = s.wsConn.SetWriteDeadline(time.Time{})
 	s.wsMutex.Unlock()
 
 	return
@@ -533,7 +547,9 @@ func (s *Session) GatewayWriteStruct(data interface{}) (err error) {
 	}
 
 	s.wsMutex.Lock()
+	_ = s.wsConn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 	err = s.wsConn.WriteJSON(data)
+	_ = s.wsConn.SetWriteDeadline(time.Time{})
 	s.wsMutex.Unlock()
 
 	return err
@@ -549,7 +565,9 @@ func (s *Session) requestGuildMembers(data requestGuildMembersData) (err error) 
 	}
 
 	s.wsMutex.Lock()
+	_ = s.wsConn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 	err = s.wsConn.WriteJSON(requestGuildMembersOp{8, data})
+	_ = s.wsConn.SetWriteDeadline(time.Time{})
 	s.wsMutex.Unlock()
 
 	return
@@ -603,7 +621,9 @@ func (s *Session) onEvent(messageType int, message []byte) (*Event, error) {
 	if e.Operation == 1 {
 		s.log(LogInformational, "sending heartbeat in response to Op1")
 		s.wsMutex.Lock()
+		_ = s.wsConn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 		err = s.wsConn.WriteJSON(heartbeatOp{1, atomic.LoadInt64(s.sequence)})
+		_ = s.wsConn.SetWriteDeadline(time.Time{})
 		s.wsMutex.Unlock()
 		if err != nil {
 			s.log(LogError, "error sending heartbeat in response to Op1")
@@ -759,9 +779,24 @@ func (s *Session) identify() error {
 
 	// Send Identify packet to Discord
 	op := identifyOp{2, s.Identify}
+
+	identifyMu.Lock()
+	since := time.Since(lastIdentify)
+	if since < 5100*time.Millisecond {
+		sleep := 5100*time.Millisecond - since
+		identifyMu.Unlock()
+		s.log(LogInformational, "identifying rate limit, sleeping %v", sleep)
+		time.Sleep(sleep)
+		identifyMu.Lock()
+	}
+	lastIdentify = time.Now()
+	identifyMu.Unlock()
+
 	s.log(LogDebug, "Identify Packet: \n%#v", op)
 	s.wsMutex.Lock()
+	_ = s.wsConn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 	err := s.wsConn.WriteJSON(op)
+	_ = s.wsConn.SetWriteDeadline(time.Time{})
 	s.wsMutex.Unlock()
 
 	return err
@@ -837,7 +872,9 @@ func (s *Session) CloseWithCode(closeCode int) (err error) {
 		// To cleanly close a connection, a client should send a close
 		// frame and wait for the server to close the connection.
 		s.wsMutex.Lock()
+		_ = s.wsConn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 		err := s.wsConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, ""))
+		_ = s.wsConn.SetWriteDeadline(time.Time{})
 		s.wsMutex.Unlock()
 		if err != nil {
 			s.log(LogInformational, "error closing websocket, %s", err)

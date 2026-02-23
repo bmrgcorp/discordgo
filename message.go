@@ -161,12 +161,21 @@ type Message struct {
 // UnmarshalJSON is a helper function to unmarshal the Message.
 func (m *Message) UnmarshalJSON(data []byte) error {
 	type message Message
-	var v message
+	var v struct {
+		message
+		RawComponents []unmarshalableMessageComponent `json:"components"`
+	}
 	err := json.Unmarshal(data, &v)
 	if err != nil {
 		return err
 	}
-	*m = Message(v)
+	*m = Message(v.message)
+	if v.RawComponents != nil {
+		m.Components = make([]MessageComponent, len(v.RawComponents))
+		for i, comp := range v.RawComponents {
+			m.Components[i] = comp.MessageComponent
+		}
+	}
 	return err
 }
 

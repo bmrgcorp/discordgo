@@ -153,7 +153,7 @@ const (
 // for default in-app oauth2 authorization link.
 type ApplicationInstallParams struct {
 	Scopes      []string `json:"scopes"`
-	Permissions int64    `json:"permissions,string"`
+	Permissions int64    `json:"permissions"`
 }
 
 // ApplicationIntegrationTypeConfig represents application's configuration for a particular integration type.
@@ -522,8 +522,8 @@ const (
 type PermissionOverwrite struct {
 	ID    string                  `json:"id"`
 	Type  PermissionOverwriteType `json:"type"`
-	Deny  int64                   `json:"deny,string"`
-	Allow int64                   `json:"allow,string"`
+	Deny  int64                   `json:"deny"`
+	Allow int64                   `json:"allow"`
 }
 
 // ThreadStart stores all parameters you can use with MessageThreadStartComplex or ThreadStartComplex
@@ -902,7 +902,7 @@ type Guild struct {
 	ApproximatePresenceCount int `json:"approximate_presence_count"`
 
 	// Permissions of our user
-	Permissions int64 `json:"permissions,string"`
+	Permissions int64 `json:"permissions"`
 
 	// StageInstances array removed for memory optimization
 }
@@ -1285,7 +1285,7 @@ type UserGuild struct {
 	Name        string         `json:"name"`
 	Icon        string         `json:"icon"`
 	Owner       bool           `json:"owner"`
-	Permissions int64          `json:"permissions,string"`
+	Permissions int64          `json:"permissions"`
 	Features    []GuildFeature `json:"features"`
 
 	// Approximate number of members in this guild.
@@ -1384,7 +1384,7 @@ type Role struct {
 	// The permissions of the role on the guild (doesn't include channel overrides).
 	// This is a combination of bit masks; the presence of a certain permission can
 	// be checked by performing a bitwise AND between this int and the permission.
-	Permissions int64 `json:"permissions,string"`
+	Permissions int64 `json:"permissions"`
 
 	// The hash of the role icon. Use Role.IconURL to retrieve the icon's URL.
 	Icon string `json:"icon"`
@@ -1439,7 +1439,7 @@ type RoleParams struct {
 	// Whether to display the role's users separately
 	Hoist *bool `json:"hoist,omitempty"`
 	// The overall permissions number of the role
-	Permissions *int64 `json:"permissions,omitempty,string"`
+	Permissions *int64 `json:"permissions,omitempty"`
 	// Whether this role is mentionable
 	Mentionable *bool `json:"mentionable,omitempty"`
 	// The role's unicode emoji.
@@ -1577,7 +1577,7 @@ type Member struct {
 	Pending bool `json:"pending"`
 
 	// Total permissions of the member in the channel, including overrides, returned when in the interaction object.
-	Permissions int64 `json:"permissions,string"`
+	Permissions int64 `json:"permissions"`
 
 	// The time at which the member's timeout will expire.
 	// Time in the past or nil if the user is not timed out.

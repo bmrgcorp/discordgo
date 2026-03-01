@@ -598,10 +598,10 @@ type InteractionResponse struct {
 
 // InteractionResponseData is response data for an interaction.
 type InteractionResponseData struct {
-	TTS             bool                    `json:"tts"`
-	Content         string                  `json:"content"`
-	Components      []MessageComponent      `json:"components"`
-	Embeds          []*MessageEmbed         `json:"embeds"`
+	TTS             bool                    `json:"tts,omitempty"`
+	Content         string                  `json:"content,omitempty"`
+	Components      []MessageComponent      `json:"components,omitempty"`
+	Embeds          []*MessageEmbed         `json:"embeds,omitempty"`
 	AllowedMentions *MessageAllowedMentions `json:"allowed_mentions,omitempty"`
 	Files           []*File                 `json:"-"`
 	Attachments     *[]*MessageAttachment   `json:"attachments,omitempty"`

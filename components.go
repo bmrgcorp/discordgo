@@ -98,8 +98,6 @@ type ActionsRow struct {
 	// Can contain Button, SelectMenu and TextInput.
 	// NOTE: maximum of 5.
 	Components []MessageComponent `json:"components"`
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID int `json:"id,omitempty"`
 }
 
 // MarshalJSON is a method for marshaling ActionsRow to a JSON object.
@@ -179,8 +177,6 @@ type Button struct {
 	CustomID string `json:"custom_id,omitempty"`
 	// Identifier for a purchasable SKU. Only available when using premium-style buttons.
 	SKUID string `json:"sku_id,omitempty"`
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID int `json:"id,omitempty"`
 }
 
 // MarshalJSON is a method for marshaling Button to a JSON object.
@@ -269,9 +265,6 @@ type SelectMenu struct {
 	// NOTE: Can only be used in SelectMenu with Channel menu type.
 	ChannelTypes []ChannelType `json:"channel_types,omitempty"`
 
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID int `json:"id,omitempty"`
-
 	// List of values that is only populated when receiving an interaction response; do not fill this manually.
 	Values []string `json:"values,omitempty"`
 }
@@ -307,9 +300,6 @@ type TextInput struct {
 	Required    bool          `json:"required"`
 	MinLength   int            `json:"min_length,omitempty"`
 	MaxLength   int            `json:"max_length,omitempty"`
-
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID int `json:"id,omitempty"`
 }
 
 // Type is a method to get the type of a component.
@@ -341,8 +331,6 @@ const (
 
 // Section is a top-level layout component that allows you to join text contextually with an accessory.
 type Section struct {
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID int `json:"id,omitempty"`
 	// Array of text display components; max of 3.
 	Components []MessageComponent `json:"components"`
 	// Can be Button or Thumbnail
@@ -417,8 +405,6 @@ func (t TextDisplay) MarshalJSON() ([]byte, error) {
 
 // Thumbnail component can be used as an accessory for a section component.
 type Thumbnail struct {
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID          int               `json:"id,omitempty"`
 	Media       UnfurledMediaItem `json:"media"`
 	Description *string           `json:"description,omitempty"`
 	Spoiler     bool              `json:"spoiler,omitempty"`
@@ -444,8 +430,6 @@ func (t Thumbnail) MarshalJSON() ([]byte, error) {
 
 // MediaGallery is a top-level component allows you to group images, videos or gifs into a gallery grid.
 type MediaGallery struct {
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID int `json:"id,omitempty"`
 	// Array of media gallery items; max of 10.
 	Items []MediaGalleryItem `json:"items"`
 }
@@ -477,8 +461,6 @@ type MediaGalleryItem struct {
 
 // FileComponent is a top-level component that allows you to display an uploaded file as an attachment to the message and reference it in the component.
 type FileComponent struct {
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID      int               `json:"id,omitempty"`
 	File    UnfurledMediaItem `json:"file"`
 	Spoiler bool              `json:"spoiler"`
 }
@@ -512,9 +494,6 @@ const (
 
 // Separator is a top-level layout component that adds vertical padding and visual division between other components.
 type Separator struct {
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID int `json:"id,omitempty"`
-
 	Divider *bool                 `json:"divider,omitempty"`
 	Spacing *SeparatorSpacingSize `json:"spacing,omitempty"`
 }
@@ -540,8 +519,6 @@ func (s Separator) MarshalJSON() ([]byte, error) {
 // Container is a top-level layout component.
 // Containers are visually distinct from surrounding components and have an optional customizable color bar (similar to embeds).
 type Container struct {
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID          int                `json:"id,omitempty"`
 	AccentColor *int               `json:"accent_color,omitempty"`
 	Spoiler     bool               `json:"spoiler"`
 	Components  []MessageComponent `json:"components"`
@@ -591,8 +568,6 @@ func (c Container) MarshalJSON() ([]byte, error) {
 // Label is a top-level layout component.
 // Labels wrap modal components with text as a label and optional description.
 type Label struct {
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID          int              `json:"id,omitempty"`
 	Label       string           `json:"label"`
 	Description string           `json:"description,omitempty"`
 	Component   MessageComponent `json:"component"`
@@ -639,8 +614,6 @@ func (l Label) MarshalJSON() ([]byte, error) {
 // FileUpload is an interactive component that allows users to upload files in modals.
 // FileUploads are available on modals. They must be placed inside a Label.
 type FileUpload struct {
-	// Unique identifier for the component; auto populated through increment if not provided.
-	ID        int    `json:"id,omitempty"`
 	CustomID  string `json:"custom_id,omitempty"`
 	MinValues *int   `json:"min_values,omitempty"`
 	MaxValues int    `json:"max_values,omitempty"`

@@ -76,6 +76,9 @@ type Session struct {
 	// TODO: Remove Below, Deprecated, Use Identify struct
 	Token string
 
+	// ProxyToken is the token used to authenticate with Sirocco.
+	ProxyToken string
+
 	MFA bool
 
 	// Debug for printing JSON request/responses

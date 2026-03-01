@@ -17,11 +17,54 @@ import (
 	"math"
 	"net/http"
 	"regexp"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
 )
+
+
+// Bitfield represents a bitfield that can be marshaled/unmarshaled as both a string and an integer.
+// This is used to maintain compatibility with Sirocco which expects integers in requests, 
+// while still supporting Discord's string-based bitfields in events.
+type Bitfield int64
+
+// UnmarshalJSON handles bitfields that may arrive as strings or integers.
+func (b *Bitfield) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 || string(data) == "null" {
+		return nil
+	}
+
+	if data[0] == '"' {
+		var s string
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		if s == "" {
+			*b = 0
+			return nil
+		}
+		val, err := strconv.ParseInt(s, 10, 64)
+		if err != nil {
+			return err
+		}
+		*b = Bitfield(val)
+		return nil
+	}
+
+	var i int64
+	if err := json.Unmarshal(data, &i); err != nil {
+		return err
+	}
+	*b = Bitfield(i)
+	return nil
+}
+
+// MarshalJSON ensures the bitfield is sent as an integer to satisfy Sirocco schema requirements.
+func (b Bitfield) MarshalJSON() ([]byte, error) {
+	return json.Marshal(int64(b))
+}
 
 // A Session represents a connection to the Discord API.
 type Session struct {
@@ -153,7 +196,7 @@ const (
 // for default in-app oauth2 authorization link.
 type ApplicationInstallParams struct {
 	Scopes      []string `json:"scopes"`
-	Permissions int64    `json:"permissions"`
+	Permissions Bitfield `json:"permissions"`
 }
 
 // ApplicationIntegrationTypeConfig represents application's configuration for a particular integration type.
@@ -522,8 +565,8 @@ const (
 type PermissionOverwrite struct {
 	ID    string                  `json:"id"`
 	Type  PermissionOverwriteType `json:"type"`
-	Deny  int64                   `json:"deny"`
-	Allow int64                   `json:"allow"`
+	Deny  Bitfield `json:"deny"`
+	Allow Bitfield `json:"allow"`
 }
 
 // ThreadStart stores all parameters you can use with MessageThreadStartComplex or ThreadStartComplex
@@ -902,7 +945,7 @@ type Guild struct {
 	ApproximatePresenceCount int `json:"approximate_presence_count"`
 
 	// Permissions of our user
-	Permissions int64 `json:"permissions"`
+	Permissions Bitfield `json:"permissions"`
 
 	// StageInstances array removed for memory optimization
 }
@@ -1285,7 +1328,7 @@ type UserGuild struct {
 	Name        string         `json:"name"`
 	Icon        string         `json:"icon"`
 	Owner       bool           `json:"owner"`
-	Permissions int64          `json:"permissions"`
+	Permissions Bitfield       `json:"permissions"`
 	Features    []GuildFeature `json:"features"`
 
 	// Approximate number of members in this guild.
@@ -1384,7 +1427,7 @@ type Role struct {
 	// The permissions of the role on the guild (doesn't include channel overrides).
 	// This is a combination of bit masks; the presence of a certain permission can
 	// be checked by performing a bitwise AND between this int and the permission.
-	Permissions int64 `json:"permissions"`
+	Permissions Bitfield `json:"permissions"`
 
 	// The hash of the role icon. Use Role.IconURL to retrieve the icon's URL.
 	Icon string `json:"icon"`
@@ -1439,7 +1482,7 @@ type RoleParams struct {
 	// Whether to display the role's users separately
 	Hoist *bool `json:"hoist,omitempty"`
 	// The overall permissions number of the role
-	Permissions *int64 `json:"permissions,omitempty"`
+	Permissions *Bitfield `json:"permissions,omitempty"`
 	// Whether this role is mentionable
 	Mentionable *bool `json:"mentionable,omitempty"`
 	// The role's unicode emoji.
@@ -1577,7 +1620,7 @@ type Member struct {
 	Pending bool `json:"pending"`
 
 	// Total permissions of the member in the channel, including overrides, returned when in the interaction object.
-	Permissions int64 `json:"permissions"`
+	Permissions Bitfield `json:"permissions"`
 
 	// The time at which the member's timeout will expire.
 	// Time in the past or nil if the user is not timed out.

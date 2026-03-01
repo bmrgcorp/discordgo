@@ -41,7 +41,7 @@ type ApplicationCommand struct {
 
 	// NOTE: DefaultPermission will be soon deprecated. Use DefaultMemberPermissions and Contexts instead.
 	DefaultPermission        *bool  `json:"default_permission,omitempty"`
-	DefaultMemberPermissions *int64 `json:"default_member_permissions,omitempty"`
+	DefaultMemberPermissions *Bitfield `json:"default_member_permissions,omitempty"`
 	NSFW                     *bool  `json:"nsfw,omitempty"`
 
 	// Deprecated: use Contexts instead.
@@ -231,7 +231,7 @@ type Interaction struct {
 	Message *Message `json:"message"`
 
 	// Bitwise set of permissions the app or bot has within the channel the interaction was sent from
-	AppPermissions int64 `json:"app_permissions"`
+	AppPermissions Bitfield `json:"app_permissions"`
 
 	// The member who invoked this interaction.
 	// NOTE: this field is only filled when the slash command was invoked in a guild;

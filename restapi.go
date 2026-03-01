@@ -2010,9 +2010,9 @@ func (s *Session) ChannelPermissionSet(channelID, targetID string, targetType Pe
 	data := struct {
 		ID    string                  `json:"id"`
 		Type  PermissionOverwriteType `json:"type"`
-		Allow int64                   `json:"allow"`
-		Deny  int64                   `json:"deny"`
-	}{targetID, targetType, allow, deny}
+		Allow Bitfield                `json:"allow"`
+		Deny  Bitfield                `json:"deny"`
+	}{targetID, targetType, Bitfield(allow), Bitfield(deny)}
 
 	_, err = s.RequestWithBucketID("PUT", EndpointChannelPermission(channelID, targetID), data, EndpointChannelPermission(channelID, ""), options...)
 	return

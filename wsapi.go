@@ -781,16 +781,20 @@ func (s *Session) identify() error {
 	op := identifyOp{2, s.Identify}
 
 	identifyMu.Lock()
-	since := time.Since(lastIdentify)
-	if since < 5100*time.Millisecond {
+	for {
+		since := time.Since(lastIdentify)
+		if since >= 5100*time.Millisecond {
+			lastIdentify = time.Now()
+			identifyMu.Unlock()
+			break
+		}
+
 		sleep := 5100*time.Millisecond - since
 		identifyMu.Unlock()
 		s.log(LogInformational, "identifying rate limit, sleeping %v", sleep)
 		time.Sleep(sleep)
 		identifyMu.Lock()
 	}
-	lastIdentify = time.Now()
-	identifyMu.Unlock()
 
 	s.log(LogDebug, "Identify Packet: \n%#v", op)
 	s.wsMutex.Lock()

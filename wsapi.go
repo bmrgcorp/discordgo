@@ -246,9 +246,9 @@ func (s *Session) listen(wsConn *websocket.Conn, listening <-chan interface{}) {
 			if sameConnection {
 
 				s.log(LogWarning, "error reading from gateway %s websocket, %s", s.gateway, err)
-				// There has been an error reading, close the websocket so that
-				// OnDisconnect event is emitted.
-				err := s.Close()
+				// Use CloseServiceRestart (1012) so Discord keeps the session alive
+				// for a resume attempt, avoiding a full re-identify.
+				err := s.CloseWithCode(websocket.CloseServiceRestart)
 				if err != nil {
 					s.log(LogWarning, "error closing session connection, %s", err)
 				}
@@ -324,7 +324,9 @@ func (s *Session) heartbeat(wsConn *websocket.Conn, listening <-chan interface{}
 			} else {
 				s.log(LogError, "haven't gotten a heartbeat ACK in %v, triggering a reconnection", time.Now().UTC().Sub(last))
 			}
-			s.Close()
+			// Use CloseServiceRestart (1012) so Discord keeps the session alive
+			// for a resume attempt, avoiding a full re-identify.
+			s.CloseWithCode(websocket.CloseServiceRestart)
 			s.reconnect()
 			return
 		}
@@ -861,6 +863,11 @@ func (s *Session) CloseWithCode(closeCode int) (err error) {
 
 	s.DataReady = false
 
+	// Track whether we were actually connected before tearing down.
+	// This prevents a double Disconnect event when both listen() and
+	// heartbeat() detect a failure at the same time and both call Close().
+	wasConnected := s.wsConn != nil || s.listening != nil
+
 	if s.listening != nil {
 		s.log(LogInformational, "closing listening channel")
 		close(s.listening)
@@ -898,8 +905,14 @@ func (s *Session) CloseWithCode(closeCode int) (err error) {
 
 	s.Unlock()
 
-	s.log(LogInformational, "emit disconnect event")
-	s.handleEvent(disconnectEventType, &Disconnect{})
+	// Only emit the disconnect event if we were actually connected.
+	// A second concurrent Close() call (e.g. from heartbeat racing listen)
+	// will find wsConn already nil and skip the event, preventing a
+	// spurious second disconnect notification.
+	if wasConnected {
+		s.log(LogInformational, "emit disconnect event")
+		s.handleEvent(disconnectEventType, &Disconnect{})
+	}
 
 	return
 }

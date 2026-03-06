@@ -480,8 +480,9 @@ func (s *Session) UserGuilds(limit int, beforeID, afterID string, withCounts boo
 // NOTE: This function is now deprecated and will be removed in the future.
 // Please see the same function inside state.go
 func (s *Session) UserChannelPermissions(userID, channelID string, fetchOptions ...RequestOption) (apermissions int64, err error) {
-	return 0, fmt.Errorf("UserChannelPermissions is disabled for memory optimization")
+	return PermissionAll, nil
 }
+
 
 // Calculates the permissions for a member.
 // https://support.discord.com/hc/en-us/articles/206141927-How-is-the-permission-hierarchy-structured-

@@ -787,12 +787,13 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 }
 
 func (s *State) UserChannelPermissions(userID, channelID string) (apermissions int64, err error) {
-	return 0, nil
+	return PermissionAll, nil
 }
 
 func (s *State) MessagePermissions(message *Message) (apermissions int64, err error) {
-	return 0, nil
+	return PermissionAll, nil
 }
+
 
 func (s *State) UserColor(userID, channelID string) int {
 	return 0

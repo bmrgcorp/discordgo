@@ -334,7 +334,7 @@ type Section struct {
 	// Array of text display components; max of 3.
 	Components []MessageComponent `json:"components"`
 	// Can be Button or Thumbnail
-	Accessory MessageComponent `json:"accessory"`
+	Accessory MessageComponent `json:"accessory,omitempty"`
 }
 
 // UnmarshalJSON is a method for unmarshaling Section from JSON

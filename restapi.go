@@ -1700,13 +1700,16 @@ func (s *Session) ChannelMessageSendComplex(channelID string, data *MessageSend,
 		}
 	}
 
+	hasComponentsV2 := false
 	for _, embed := range data.Embeds {
 		if embed != nil && len(embed.ComponentsV2) > 0 {
 			data.Components = append(data.Components, embed.ComponentsV2...)
-			data.Flags |= MessageFlagsIsComponentsV2
-			data.Embeds = nil
-			break
+			hasComponentsV2 = true
 		}
+	}
+	if hasComponentsV2 {
+		data.Flags |= MessageFlagsIsComponentsV2
+		data.Embeds = nil
 	}
 
 	for _, embed := range data.Embeds {
@@ -1837,16 +1840,19 @@ func (s *Session) ChannelMessageEditComplex(m *MessageEdit, options ...RequestOp
 	}
 
 	if m.Embeds != nil {
+		hasComponentsV2 := false
 		for _, embed := range *m.Embeds {
 			if embed != nil && len(embed.ComponentsV2) > 0 {
 				if m.Components == nil {
 					m.Components = &[]MessageComponent{}
 				}
 				*m.Components = append(*m.Components, embed.ComponentsV2...)
-				m.Flags |= MessageFlagsIsComponentsV2
-				m.Embeds = &[]*MessageEmbed{}
-				break
+				hasComponentsV2 = true
 			}
+		}
+		if hasComponentsV2 {
+			m.Flags |= MessageFlagsIsComponentsV2
+			m.Embeds = &[]*MessageEmbed{}
 		}
 	}
 

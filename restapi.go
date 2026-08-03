@@ -1701,6 +1701,15 @@ func (s *Session) ChannelMessageSendComplex(channelID string, data *MessageSend,
 	}
 
 	for _, embed := range data.Embeds {
+		if embed != nil && len(embed.ComponentsV2) > 0 {
+			data.Components = append(data.Components, embed.ComponentsV2...)
+			data.Flags |= MessageFlagsIsComponentsV2
+			data.Embeds = nil
+			break
+		}
+	}
+
+	for _, embed := range data.Embeds {
 		if embed.Type == "" {
 			embed.Type = "rich"
 		}
@@ -1824,6 +1833,20 @@ func (s *Session) ChannelMessageEditComplex(m *MessageEdit, options ...RequestOp
 		} else {
 			err = fmt.Errorf("cannot specify both Embed and Embeds")
 			return
+		}
+	}
+
+	if m.Embeds != nil {
+		for _, embed := range *m.Embeds {
+			if embed != nil && len(embed.ComponentsV2) > 0 {
+				if m.Components == nil {
+					m.Components = &[]MessageComponent{}
+				}
+				*m.Components = append(*m.Components, embed.ComponentsV2...)
+				m.Flags |= MessageFlagsIsComponentsV2
+				m.Embeds = &[]*MessageEmbed{}
+				break
+			}
 		}
 	}
 

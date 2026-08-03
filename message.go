@@ -437,6 +437,7 @@ type MessageEmbed struct {
 	Provider    *MessageEmbedProvider  `json:"provider,omitempty"`
 	Author      *MessageEmbedAuthor    `json:"author,omitempty"`
 	Fields      []*MessageEmbedField   `json:"fields,omitempty"`
+	ComponentsV2 []MessageComponent    `json:"-"`
 }
 
 // EmbedType is the type of embed

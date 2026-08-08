@@ -1710,6 +1710,13 @@ func (s *Session) ChannelMessageSendComplex(channelID string, data *MessageSend,
 	if hasComponentsV2 {
 		data.Flags |= MessageFlagsIsComponentsV2
 		data.Embeds = nil
+		if data.Content != "" {
+			_, err = s.ChannelMessageSend(channelID, data.Content)
+			if err != nil {
+				return nil, err
+			}
+			data.Content = ""
+		}
 	}
 
 	for _, embed := range data.Embeds {
